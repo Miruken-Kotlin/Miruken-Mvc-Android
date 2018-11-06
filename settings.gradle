@@ -1,1 +1,1 @@
-include ':app', ':miruken-mvc-android'
+include ':miruken-mvc-android'

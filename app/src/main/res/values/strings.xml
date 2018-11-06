@@ -1,7 +1,0 @@
-<resources>
-    <string name="app_name">Read Every Word</string>
-    <string name="old_testament">Old Testament</string>
-    <string name="new_testament">New Testament</string>
-    <string name="old_testament_progress">Old Testament Progress</string>
-    <string name="new_testament_progress">New Testament Progress</string>
-</resources>

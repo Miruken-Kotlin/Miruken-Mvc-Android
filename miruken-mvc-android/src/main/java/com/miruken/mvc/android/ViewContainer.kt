@@ -7,6 +7,7 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
+import com.miruken.TypeReference
 import com.miruken.callback.Handling
 import com.miruken.callback.notHandled
 import com.miruken.callback.requireComposer
@@ -47,6 +48,8 @@ abstract class ViewContainer :
     )= (when (viewKey) {
             is KType -> createView(viewKey.jvmErasure)
             is KClass<*> -> createView(viewKey)
+            is TypeReference ->
+                createView((viewKey.type as Class<*>).kotlin)
             else -> null
         } ?: notHandled()).also { init?.invoke(it) }
 

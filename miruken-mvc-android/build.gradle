@@ -4,7 +4,7 @@ apply plugin: 'digital.wup.android-maven-publish'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'kotlin-kapt'
 
-version = '0.0.1-alpha.0028'
+version = packageVersion
 
 android {
     compileSdkVersion 28
@@ -16,7 +16,6 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
     }
 
     buildTypes {
@@ -37,21 +36,23 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    api "com.miruken:miruken:$mirukenVersion"
+    api "com.miruken:miruken-mvc:$mirukenVersion"
     implementation 'androidx.appcompat:appcompat:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    api 'com.miruken:miruken:0.0.2-alpha.0012'
-    api 'com.miruken:miruken-mvc:0.0.2-alpha.0012'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
 }
 
+def artifactName = 'miruken-mvc-android'
+
 publishing {
     publications {
         maven(MavenPublication) {
             from components.android
-            groupId 'com.miruken'
-            artifactId 'miruken-mvc-android'
+            groupId    mirukenGroupId
+            artifactId artifactName
             pom.withXml {
                 def properties = asNode().appendNode('properties')
                 properties.appendNode('maven.compiler.source', '1.8')
@@ -67,12 +68,11 @@ bintray {
     publications = ['maven']
     publish = true
     pkg {
-        userOrg = 'Miruken'
-        repo = 'MavenPackages'
-        name = 'miruken-mvc-android'
-        userOrg = 'miruken'
-        licenses = ['MIT']
-        vcsUrl = 'https://github.com/Miruken-Kotlin/Miruken-Mvc-Android'
+        name     = artifactName
+        userOrg  = mirukenOrg
+        repo     = mirukenRepo
+        licenses = [mirukenLicense]
+        vcsUrl   = mirukenVcsUrl
         version {
             released = new Date()
         }

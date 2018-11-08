@@ -7,7 +7,7 @@ import com.miruken.mvc.view.Viewing
 import com.miruken.mvc.view.ViewingRegion
 
 class ViewLayout(
-        @IdRes @LayoutRes val layoutId:    Int,
+        @LayoutRes val layoutId:    Int,
         private val initView: (View.() -> Unit)? = null
 ) : Viewing {
     override var viewModel: Any? = null

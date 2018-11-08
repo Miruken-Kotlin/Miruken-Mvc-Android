@@ -8,8 +8,8 @@ import com.miruken.mvc.view.Viewing
 import com.miruken.mvc.view.ViewingRegion
 
 class ViewBindingLayout<B: ViewDataBinding>(
-        @IdRes @LayoutRes val layoutId:    Int,
-        @IdRes private    val viewModelId: Int,
+        @LayoutRes     val layoutId:    Int,
+        @IdRes private val viewModelId: Int,
         private val initView: (View.(binding: B) -> Unit)? = null
 ) : Viewing {
     override var viewModel: Any? = null

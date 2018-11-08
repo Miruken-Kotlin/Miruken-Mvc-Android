@@ -11,7 +11,7 @@ fun setVisibility(view: View, value: Boolean?) {
     }
 }
 
-@BindingAdapter("app:src")
+@BindingAdapter("android:src")
 fun setImage(view: ImageView, value: Int?) {
     value?.apply {
         view.setImageResource(value)

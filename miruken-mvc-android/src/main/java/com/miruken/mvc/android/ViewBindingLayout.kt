@@ -10,10 +10,9 @@ import com.miruken.mvc.view.ViewingRegion
 class ViewBindingLayout<B: ViewDataBinding>(
         @LayoutRes     val layoutId:    Int,
         @IdRes private val viewModelId: Int,
-        private val initView: (View.(binding: B) -> Unit)? = null
+        override       var viewModel: Any? = null,
+        private        val initView: (View.(binding: B) -> Unit)? = null
 ) : Viewing {
-    override var viewModel: Any? = null
-
     override fun display(region: ViewingRegion) =
             region.show(this)
 

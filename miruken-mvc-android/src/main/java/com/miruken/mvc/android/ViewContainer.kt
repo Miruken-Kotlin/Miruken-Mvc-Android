@@ -17,7 +17,6 @@ import com.miruken.mvc.view.ViewingRegion
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.jvm.jvmErasure
 
 abstract class ViewContainer :
         ConstraintLayout, ViewingRegion, Viewing {
@@ -46,12 +45,13 @@ abstract class ViewContainer :
             viewKey: Any,
             init:    (Viewing.() -> Unit)?
     )= (when (viewKey) {
-            is KType -> createView(viewKey.jvmErasure)
-            is KClass<*> -> createView(viewKey)
-            is TypeReference ->
-                createView((viewKey.type as Class<*>).kotlin)
-            else -> null
-        } ?: notHandled()).also { init?.invoke(it) }
+        is KClass<*> -> createView(viewKey)
+        is KType -> (viewKey.classifier as? KClass<*>)
+                ?.let(::createView)
+        is TypeReference -> (viewKey.type as? Class<*>)?.kotlin
+                ?.let(::createView)
+        else -> null
+    } ?: notHandled()).also { init?.invoke(it) }
 
     override fun show(view: Viewing): ViewingLayer {
         val composer = requireComposer()

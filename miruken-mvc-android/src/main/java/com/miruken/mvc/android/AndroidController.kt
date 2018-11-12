@@ -8,18 +8,20 @@ import com.miruken.callback.Handling
 import com.miruken.mvc.Controller
 import com.miruken.mvc.android.databinding.NotifiableObservable
 
-@Suppress("LeakingThis")
 open class AndroidController : Controller(),
         NotifiableObservable by NotifiableObservable.delegate() {
 
     init {
+        @Suppress("LeakingThis")
         initDelegator(this)
     }
+
+    abstract inner class ViewModel : AndroidViewModel()
 
     protected fun showR(
             @LayoutRes layoutId: Int,
             viewModel: Any? = null,
-            init: (View.() -> Unit)? = null
+            init:      (View.() -> Unit)? = null
     ) = show(ViewLayout(layoutId, viewModel, init))
 
     protected fun showR(

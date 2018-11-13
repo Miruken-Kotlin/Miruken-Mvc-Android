@@ -1,10 +1,12 @@
 package com.miruken.mvc.android
 
 import android.app.Activity
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.IdRes
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import java.util.concurrent.FutureTask
 
 // Binding
@@ -28,6 +30,20 @@ fun <T: Any?> runOnMainThread(block: () -> T): T =
     } else {
         block()
     }
+
+// Keypad
+
+fun View.showKeyboard() {
+    if (requestFocusFromTouch()) {
+        val input = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        input.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+    }
+}
+
+fun View.hideKeyboard() {
+    val input = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    input.hideSoftInputFromWindow(windowToken, 0)
+}
 
 private val mainLooper  = Looper.getMainLooper()
 private val mainHandler = Handler(mainLooper)

@@ -12,8 +12,10 @@ import com.miruken.concurrent.Promise
 import com.miruken.event.Event
 import com.miruken.mvc.Navigation
 import com.miruken.mvc.option.RegionOptions
-import com.miruken.mvc.view.*
-import java.time.Duration
+import com.miruken.mvc.view.Viewing
+import com.miruken.mvc.view.ViewingLayer
+import com.miruken.mvc.view.ViewingStackView
+import java.util.concurrent.atomic.AtomicBoolean
 
 class ViewRegion : ViewContainer, ViewingStackView {
     private val _layers    = mutableListOf<ViewLayer>()
@@ -198,15 +200,14 @@ class ViewRegion : ViewContainer, ViewingStackView {
             private val overlay: Boolean
     ) : ViewingLayer {
         private var _composer: Handling? = null
-        private var _closed = false
+        private var _disposed = false
 
         var view: Pair<Viewing, View>? = null
             private set
 
-        override val index get() = getLayerIndex(this)
-
-        override val closed       = Event<ViewingLayer>()
+        override val index get()  = getLayerIndex(this)
         override val transitioned = Event<ViewingLayer>()
+        override val disposed     = Event<ViewingLayer>()
 
         fun transitionTo(
                 newView:  Pair<Viewing, View>,
@@ -257,18 +258,52 @@ class ViewRegion : ViewContainer, ViewingStackView {
         }
 
         override fun duration(
-                duration: Duration,
-                complete: (Boolean) -> Unit
-        ) = {}
+                durationMillis: Int,
+                done: (Boolean) -> Unit
+        ): () -> Unit {
+            val guard = AtomicBoolean(false)
+            lateinit var expired: Runnable
+
+            val stopTimer = { cancelled: Boolean ->
+                if (guard.compareAndSet(false, true)) {
+                    AndroidThreading.mainHandler.removeCallbacks(expired)
+                    done(cancelled)
+                }
+            }
+
+            expired = Runnable { stopTimer(false) }
+
+            if (!AndroidThreading.mainHandler.postDelayed(
+                    expired, durationMillis.toLong())) {
+                stopTimer(false)
+            }
+
+            var cancelTransition: (() -> Unit)? = null
+            var cancelDisposed:   (() -> Unit)? = null
+
+            cancelTransition = transitioned.register {
+                stopTimer(true)
+                cancelTransition?.invoke()
+                cancelDisposed?.invoke()
+            }
+
+            cancelDisposed = transitioned.register {
+                stopTimer(false)
+                cancelDisposed?.invoke()
+                cancelTransition.invoke()
+            }
+
+            return { stopTimer(true) }
+        }
 
         override fun close() {
-            if (_closed) return
+            if (_disposed) return
             try {
                 removeLayer(this)
             } finally {
-                _closed   = true
+                _disposed   = true
                 _composer = null
-                closed(this)
+                disposed(this)
             }
         }
     }

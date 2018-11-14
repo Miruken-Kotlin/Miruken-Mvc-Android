@@ -1,15 +1,19 @@
 package com.miruken.mvc.android
 
-import androidx.databinding.ViewDataBinding
 import android.view.View
 import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
+import androidx.databinding.ObservableBoolean
+import androidx.databinding.ViewDataBinding
 import com.miruken.callback.Handling
 import com.miruken.mvc.Controller
 import com.miruken.mvc.android.databinding.NotifiableObservable
+import java.util.concurrent.atomic.AtomicBoolean
 
 open class AndroidController : Controller(),
-        NotifiableObservable by NotifiableObservable.delegate() {
+        NotifiableObservable by NotifiableObservable.delegate(),
+        Guarding {
+    private val _guarded = AtomicBoolean(false)
 
     init {
         @Suppress("LeakingThis")
@@ -17,6 +21,18 @@ open class AndroidController : Controller(),
     }
 
     abstract inner class ViewModel : AndroidViewModel()
+
+    val guarded   = ObservableBoolean(false)
+    val unguarded = ObservableBoolean(true)
+
+    override fun guard(guard: Boolean): Boolean {
+        if (_guarded.compareAndSet(!guard, guard)) {
+            guarded.set(guard)
+            unguarded.set(!guard)
+            return true
+        }
+        return false
+    }
 
     protected fun showR(
             @LayoutRes layoutId: Int,

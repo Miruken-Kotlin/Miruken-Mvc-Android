@@ -2,11 +2,9 @@ package com.miruken.mvc.android
 
 import android.app.Activity
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
-import androidx.annotation.IdRes
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.annotation.IdRes
 import java.util.concurrent.FutureTask
 
 // Binding
@@ -23,9 +21,9 @@ private fun <T> unsafeLazy(initializer: () -> T) =
 // Synchronization
 
 fun <T: Any?> runOnMainThread(block: () -> T): T =
-    if (Thread.currentThread() != mainThread) {
+    if (Thread.currentThread() != AndroidThreading.mainThread) {
         val task = FutureTask<T>(block)
-        mainHandler.post(task)
+        AndroidThreading.mainHandler.post(task)
         task.get()
     } else {
         block()
@@ -45,6 +43,3 @@ fun View.hideKeyboard() {
     input.hideSoftInputFromWindow(windowToken, 0)
 }
 
-private val mainLooper  = Looper.getMainLooper()
-private val mainHandler = Handler(mainLooper)
-private val mainThread  = mainLooper.thread

@@ -4,10 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.RelativeLayout
-import com.miruken.callback.Handling
-import com.miruken.callback.getOptions
-import com.miruken.callback.notHandled
-import com.miruken.callback.resolve
+import com.miruken.callback.*
 import com.miruken.concurrent.Promise
 import com.miruken.event.Event
 import com.miruken.mvc.Navigation
@@ -38,6 +35,9 @@ class ViewRegion : ViewContainer, ViewingStackView {
     ) : super(context, attrs, defStyleAttr)
 
     val activeView get() = activeLayer?.view
+
+    @Provides
+    fun provideContext(): Context = context
 
     override fun createViewStack() =
             ViewRegion(context).apply { _isChild = true }
@@ -258,42 +258,41 @@ class ViewRegion : ViewContainer, ViewingStackView {
         }
 
         override fun duration(
-                durationMillis: Int,
+                durationMillis: Long,
                 done: (Boolean) -> Unit
         ): () -> Unit {
             val guard = AtomicBoolean(false)
-            lateinit var expired: Runnable
-
-            val stopTimer = { cancelled: Boolean ->
-                if (guard.compareAndSet(false, true)) {
-                    AndroidThreading.mainHandler.removeCallbacks(expired)
-                    done(cancelled)
-                }
-            }
-
-            expired = Runnable { stopTimer(false) }
-
-            if (!AndroidThreading.mainHandler.postDelayed(
-                    expired, durationMillis.toLong())) {
-                stopTimer(false)
-            }
 
             var cancelTransition: (() -> Unit)? = null
             var cancelDisposed:   (() -> Unit)? = null
 
+            lateinit var expired: Runnable
+
+            val stopTimer = { cancelled: Boolean, complete: Boolean ->
+                if (guard.compareAndSet(false, true)) {
+                    cancelTransition?.invoke()
+                    cancelDisposed?.invoke()
+                    AndroidThreading.mainHandler.removeCallbacks(expired)
+                    if (complete) done(cancelled)
+                }
+            }
+
+            expired = Runnable { stopTimer(false, true) }
+
+            if (!AndroidThreading.mainHandler.postDelayed(
+                    expired, durationMillis)) {
+                stopTimer(false, true)
+            }
+
             cancelTransition = transitioned.register {
-                stopTimer(true)
-                cancelTransition?.invoke()
-                cancelDisposed?.invoke()
+                stopTimer(true, false)
             }
 
             cancelDisposed = transitioned.register {
-                stopTimer(false)
-                cancelDisposed?.invoke()
-                cancelTransition.invoke()
+                stopTimer(false, false)
             }
 
-            return { stopTimer(true) }
+            return { stopTimer(true, true) }
         }
 
         override fun close() {

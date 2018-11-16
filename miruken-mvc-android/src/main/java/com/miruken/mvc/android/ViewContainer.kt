@@ -55,7 +55,9 @@ abstract class ViewContainer :
 
     override fun show(view: Viewing): ViewingLayer {
         val composer = requireComposer()
-        return runOnMainThread { show(view, composer) }
+        return AndroidThreading.runOnMainThread {
+            show(view, composer)
+        }
     }
 
     abstract fun show(
@@ -86,7 +88,7 @@ abstract class ViewContainer :
             it.parameters.size == 1 &&
             it.parameters[0].type.classifier == Context::class
         }?.let {
-            runOnMainThread {
+            AndroidThreading.runOnMainThread {
                 it.call(context) as Viewing
             }
         }

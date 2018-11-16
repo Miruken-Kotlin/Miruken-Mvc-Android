@@ -247,7 +247,7 @@ class ViewRegion : ViewContainer, ViewingStackView {
             return this
         }
 
-        fun transitionFrom() = runOnMainThread {
+        fun transitionFrom() = AndroidThreading.runOnMainThread {
             val activeView = activeView
             view?.takeUnless {
                 it.second === activeView?.second

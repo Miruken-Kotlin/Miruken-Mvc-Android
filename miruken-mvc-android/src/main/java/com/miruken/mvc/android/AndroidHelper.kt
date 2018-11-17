@@ -19,15 +19,22 @@ private fun <T> unsafeLazy(initializer: () -> T) =
 
 // Keypad
 
-fun View.showKeyboard() {
+fun View.showKeyboard(): View? {
     if (requestFocusFromTouch()) {
-        val input = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val focused = findFocus() ?: return null
+        val input   = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         input.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+        focused.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) focused.hideKeyboard()
+        }
+        return focused
     }
+    return null
 }
 
 fun View.hideKeyboard() {
     val input = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     input.hideSoftInputFromWindow(windowToken, 0)
+    clearFocus()
 }
 

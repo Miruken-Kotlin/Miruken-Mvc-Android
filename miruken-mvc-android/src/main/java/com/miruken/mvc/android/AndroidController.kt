@@ -13,26 +13,22 @@ import java.util.concurrent.atomic.AtomicBoolean
 open class AndroidController : Controller(),
         NotifiableObservable by NotifiableObservable.delegate(),
         Guarding {
-    private val _guarded = AtomicBoolean(false)
-
     init {
         @Suppress("LeakingThis")
         initDelegator(this)
     }
 
-    abstract inner class ViewModel : AndroidViewModel()
-
-    val guarded   = ObservableBoolean(false)
-    val unguarded = ObservableBoolean(true)
+    val guarded = ObservableBoolean(false)
 
     override fun guard(guard: Boolean): Boolean {
-        if (_guarded.compareAndSet(!guard, guard)) {
+        if (guarded.get() != guard) {
             guarded.set(guard)
-            unguarded.set(!guard)
             return true
         }
         return false
     }
+
+    abstract inner class ViewModel : AndroidViewModel()
 
     protected fun showR(
             @LayoutRes layoutId: Int,

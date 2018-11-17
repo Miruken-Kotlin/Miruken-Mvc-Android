@@ -19,7 +19,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.isSubclassOf
 
 abstract class ViewContainer :
-        ConstraintLayout, ViewingRegion, Viewing {
+        ConstraintLayout, ViewingRegion, Viewing, Keyboard {
 
     constructor(
             context: Context?
@@ -60,10 +60,11 @@ abstract class ViewContainer :
         }
     }
 
-    abstract fun show(
-            view:     Viewing,
-            composer: Handling
-    ): ViewingLayer
+    abstract fun show(view: Viewing, composer: Handling): ViewingLayer
+
+    override fun present(focus: View?) = (focus ?: this).showKeyboard()
+
+    override fun dismiss() = hideKeyboard()
 
     protected fun inflateLayout(layout: ViewLayout): View =
         View.inflate(context, layout.layoutId, null).apply {

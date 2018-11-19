@@ -35,6 +35,7 @@ fun View.showKeyboard(): View? {
 fun View.hideKeyboard() {
     val input = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     input.hideSoftInputFromWindow(windowToken, 0)
-    clearFocus()
+    val focused = findFocus()
+    focused?.clearFocus()
 }
 

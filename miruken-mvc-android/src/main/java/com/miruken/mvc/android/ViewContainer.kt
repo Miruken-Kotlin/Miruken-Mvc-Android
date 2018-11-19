@@ -62,9 +62,10 @@ abstract class ViewContainer :
 
     abstract fun show(view: Viewing, composer: Handling): ViewingLayer
 
-    override fun present(focus: View?) = (focus ?: this).showKeyboard()
+    override fun presentKeyboard(focus: View?) =
+            (focus ?: this).showKeyboard()
 
-    override fun dismiss() = hideKeyboard()
+    override fun dismissKeyboard() = hideKeyboard()
 
     protected fun inflateLayout(layout: ViewLayout): View =
         View.inflate(context, layout.layoutId, null).apply {

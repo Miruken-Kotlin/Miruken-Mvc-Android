@@ -8,7 +8,6 @@ import androidx.databinding.ViewDataBinding
 import com.miruken.callback.Handling
 import com.miruken.mvc.Controller
 import com.miruken.mvc.android.databinding.NotifiableObservable
-import java.util.concurrent.atomic.AtomicBoolean
 
 open class AndroidController : Controller(),
         NotifiableObservable by NotifiableObservable.delegate(),
@@ -29,6 +28,8 @@ open class AndroidController : Controller(),
     }
 
     abstract inner class ViewModel : AndroidViewModel()
+
+    // Render
 
     protected fun showR(
             @LayoutRes layoutId: Int,
@@ -72,4 +73,12 @@ open class AndroidController : Controller(),
             viewModel: Any? = null,
             init:      (View.(binding: B) -> Unit)? = null
     ) = show(handler, ViewBindingLayout(layoutId, viewModelId, viewModel, init))
+
+    // Keyboard
+
+    fun presentKeyboard(focus: View?) =
+            Keyboard(context).presentKeyboard(focus)
+
+    fun dismissKeyboard() =
+            Keyboard(context).dismissKeyboard()
 }

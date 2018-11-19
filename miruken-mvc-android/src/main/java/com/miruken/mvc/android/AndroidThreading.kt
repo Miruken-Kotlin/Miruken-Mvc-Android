@@ -5,9 +5,9 @@ import android.os.Looper
 import java.util.concurrent.FutureTask
 
 object AndroidThreading {
-    val mainLooper: Looper = Looper.getMainLooper()
+    val mainLooper:  Looper  = Looper.getMainLooper()
     val mainHandler: Handler = Handler(mainLooper)
-    val mainThread: Thread = mainLooper.thread
+    val mainThread:  Thread  = mainLooper.thread
 
     fun <T: Any?> runOnMainThread(block: () -> T): T =
             if (Thread.currentThread() != mainThread) {

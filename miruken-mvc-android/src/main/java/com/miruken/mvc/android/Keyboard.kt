@@ -8,12 +8,12 @@ import com.miruken.typeOf
 
 @Protocol
 interface Keyboard {
-    fun present(focus: View? = null): View?
-    fun dismiss()
+    fun presentKeyboard(focus: View? = null): View?
+    fun dismissKeyboard()
 
     companion object {
         val PROTOCOL = typeOf<Keyboard>()
-        operator fun invoke(adapter: ProtocolAdapter) =
-                adapter.proxy(PROTOCOL) as Keyboard
+        operator fun invoke(adapter: ProtocolAdapter?) =
+                adapter?.proxy(PROTOCOL) as Keyboard
     }
 }

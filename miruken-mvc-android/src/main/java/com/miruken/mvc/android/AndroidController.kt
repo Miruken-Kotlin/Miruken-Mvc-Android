@@ -77,8 +77,8 @@ open class AndroidController : Controller(),
     // Keyboard
 
     fun presentKeyboard(focus: View?) =
-            Keyboard(context).presentKeyboard(focus)
+            context?.also { Keyboard(it).presentKeyboard(focus) }
 
     fun dismissKeyboard() =
-            Keyboard(context).dismissKeyboard()
+            context?.also { Keyboard(it).dismissKeyboard() }
 }

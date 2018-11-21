@@ -13,7 +13,7 @@ interface Keyboard {
 
     companion object {
         val PROTOCOL = typeOf<Keyboard>()
-        operator fun invoke(adapter: ProtocolAdapter?) =
-                adapter?.proxy(PROTOCOL) as Keyboard
+        operator fun invoke(adapter: ProtocolAdapter) =
+                adapter.proxy(PROTOCOL) as Keyboard
     }
 }

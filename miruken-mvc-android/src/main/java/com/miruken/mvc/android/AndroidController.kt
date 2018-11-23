@@ -6,6 +6,7 @@ import androidx.annotation.LayoutRes
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ViewDataBinding
 import com.miruken.callback.Handling
+import com.miruken.context.requireContext
 import com.miruken.mvc.Controller
 import com.miruken.mvc.android.databinding.NotifiableObservable
 
@@ -18,6 +19,8 @@ open class AndroidController : Controller(),
     }
 
     val guarded = ObservableBoolean(false)
+
+    val guard get() = requireContext().guard(this)
 
     override fun guard(guard: Boolean): Boolean {
         if (guarded.get() != guard) {

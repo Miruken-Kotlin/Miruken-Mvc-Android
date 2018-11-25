@@ -11,6 +11,7 @@ import com.miruken.TypeReference
 import com.miruken.callback.Handling
 import com.miruken.callback.notHandled
 import com.miruken.callback.requireComposer
+import com.miruken.mvc.android.databinding.DataBindingConventions
 import com.miruken.mvc.view.Viewing
 import com.miruken.mvc.view.ViewingLayer
 import com.miruken.mvc.view.ViewingRegion
@@ -75,7 +76,8 @@ abstract class ViewContainer :
     protected fun inflateBinding(layout: ViewBindingLayout<*>): View {
         val inflater = LayoutInflater.from(context)
         val binding  = DataBindingUtil.inflate<ViewDataBinding>(
-                inflater, layout.layoutId, this, false)
+                inflater, layout.layoutId, this, false,
+                DataBindingConventions)
         layout.bind(binding.root, binding)
         return binding.root
     }

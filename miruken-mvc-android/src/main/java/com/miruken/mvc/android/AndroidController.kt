@@ -1,6 +1,7 @@
 package com.miruken.mvc.android
 
 import android.view.View
+import androidx.annotation.CallSuper
 import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
 import androidx.databinding.ObservableBoolean
@@ -9,18 +10,28 @@ import com.miruken.callback.Handling
 import com.miruken.context.requireContext
 import com.miruken.mvc.Controller
 import com.miruken.mvc.android.databinding.NotifiableObservable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlin.coroutines.CoroutineContext
 
 open class AndroidController : Controller(),
         NotifiableObservable by NotifiableObservable.delegate(),
-        Guarding {
+        Guarding, CoroutineScope {
+
     init {
         @Suppress("LeakingThis")
         initDelegator(this)
     }
 
+    private val job = Job()
+
     val guarded = ObservableBoolean(false)
 
     val guard get() = requireContext().guard(this)
+
+    override val coroutineContext: CoroutineContext
+        get() = job + Dispatchers.Main
 
     override fun guard(guard: Boolean): Boolean {
         if (guarded.get() != guard) {
@@ -84,4 +95,9 @@ open class AndroidController : Controller(),
 
     fun dismissKeyboard() =
             context?.also { Keyboard(it).dismissKeyboard() }
+
+    @CallSuper
+    override fun cleanUp() {
+        job.cancel()
+    }
 }

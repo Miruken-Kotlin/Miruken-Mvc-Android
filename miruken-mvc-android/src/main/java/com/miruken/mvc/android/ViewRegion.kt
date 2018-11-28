@@ -8,7 +8,7 @@ import com.miruken.callback.*
 import com.miruken.concurrent.Promise
 import com.miruken.event.Event
 import com.miruken.mvc.Navigation
-import com.miruken.mvc.option.RegionOptions
+import com.miruken.mvc.option.NavigationOptions
 import com.miruken.mvc.view.Viewing
 import com.miruken.mvc.view.ViewingLayer
 import com.miruken.mvc.view.ViewingStackView
@@ -49,8 +49,8 @@ class ViewRegion : ViewContainer, ViewingStackView {
         var push         = false
         var overlay      = false
         val navigation   = composer.resolve<Navigation<*>>()
-        val options      = composer.getOptions(RegionOptions())
-        val layerOptions = options?.layer
+        val options      = composer.getOptions(NavigationOptions())
+        val layerOptions = options?.region
 
         var layer: ViewLayer? = null
 
@@ -127,7 +127,7 @@ class ViewRegion : ViewContainer, ViewingStackView {
     private fun addView(
             fromView:       View?,
             view:           View,
-            options:        RegionOptions?,
+            options:        NavigationOptions?,
             removeFromView: Boolean,
             composer:       Handling
     ): Promise<*> {
@@ -211,7 +211,7 @@ class ViewRegion : ViewContainer, ViewingStackView {
 
         fun transitionTo(
                 newView:  Pair<Viewing, View>,
-                options:  RegionOptions?,
+                options:  NavigationOptions?,
                 composer: Handling
         ): ViewingLayer {
             _composer = composer

@@ -90,10 +90,12 @@ open class AndroidController : Controller(),
 
     // Keyboard
 
-    fun presentKeyboard(focus: View?) =
+    @CallSuper
+    open fun presentKeyboard(focus: View?) =
             context?.also { Keyboard(it).presentKeyboard(focus) }
 
-    fun dismissKeyboard() =
+    @CallSuper
+    open fun dismissKeyboard() =
             context?.also { Keyboard(it).dismissKeyboard() }
 
     @CallSuper

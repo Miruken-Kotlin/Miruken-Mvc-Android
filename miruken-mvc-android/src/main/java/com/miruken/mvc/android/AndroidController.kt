@@ -10,9 +10,7 @@ import com.miruken.callback.Handling
 import com.miruken.context.requireContext
 import com.miruken.mvc.Controller
 import com.miruken.mvc.android.databinding.NotifiableObservable
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
 open class AndroidController : Controller(),
@@ -24,14 +22,14 @@ open class AndroidController : Controller(),
         initDelegator(this)
     }
 
-    private val job = Job()
+    private val job = SupervisorJob()
 
     val guarded = ObservableBoolean(false)
 
     val guard get() = requireContext().guard(this)
 
     override val coroutineContext: CoroutineContext
-        get() = job + Dispatchers.Main
+        get() = Dispatchers.Main + job
 
     override fun guard(guard: Boolean): Boolean {
         if (guarded.get() != guard) {
@@ -91,7 +89,7 @@ open class AndroidController : Controller(),
     // Keyboard
 
     @CallSuper
-    open fun presentKeyboard(focus: View?) =
+    open fun presentKeyboard(focus: View? = null) =
             context?.also { Keyboard(it).presentKeyboard(focus) }
 
     @CallSuper
@@ -100,6 +98,6 @@ open class AndroidController : Controller(),
 
     @CallSuper
     override fun cleanUp() {
-        job.cancel()
+        coroutineContext.cancelChildren()
     }
 }

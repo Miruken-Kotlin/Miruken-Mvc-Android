@@ -89,12 +89,14 @@ open class AndroidController : Controller(),
     // Keyboard
 
     @CallSuper
-    open fun presentKeyboard(focus: View? = null) =
-            context?.also { Keyboard(it).presentKeyboard(focus) }
+    open fun presentKeyboard(focus: View? = null) {
+        context?.also { Keyboard(it).presentKeyboard(focus) }
+    }
 
     @CallSuper
-    open fun dismissKeyboard() =
-            context?.also { Keyboard(it).dismissKeyboard() }
+    open fun dismissKeyboard() {
+        context?.also { Keyboard(it).dismissKeyboard() }
+    }
 
     @CallSuper
     override fun cleanUp() {

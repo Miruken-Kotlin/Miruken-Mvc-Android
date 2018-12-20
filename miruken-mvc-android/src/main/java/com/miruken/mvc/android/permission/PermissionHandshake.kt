@@ -6,12 +6,16 @@ import android.graphics.Color
 import android.view.View
 import androidx.core.app.ActivityCompat
 import com.google.android.material.snackbar.Snackbar
+import com.miruken.concurrent.ChildCancelMode
 import com.miruken.concurrent.Promise
+import com.miruken.concurrent.mapError
+import com.miruken.concurrent.timeout
 import com.miruken.mvc.android.R
 import java.lang.IllegalStateException
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeoutException
 
-object PermissionManager {
+object PermissionHandshake {
     private var nextId  = 0
     private val pending = ConcurrentHashMap<Int, Pending>()
 
@@ -49,7 +53,6 @@ object PermissionManager {
             grantResults: IntArray
     ) {
         pending[requestId]?.also {
-            pending.remove(requestId)
             val permission = it.permission
             if (!permissions.contains(permission)) {
                 it.reject(IllegalStateException(
@@ -74,7 +77,17 @@ object PermissionManager {
         val request   = Pending(permission).apply { pending[requestId] = this }
         ActivityCompat.requestPermissions(
                 activity, arrayOf(permission), requestId)
-        return request.promise
+        return request.promise.timeout(PERMISSION_TIMEOUT) mapError  {
+            when (it) {
+                is TimeoutException ->
+                    throw PermissionException(
+                            Permissions.Result.DENIED,
+                            "Permission $permission denied")
+                else -> throw it
+            }
+        } finally {
+            pending.remove(requestId)
+        }
     }
 
     @Synchronized
@@ -91,9 +104,11 @@ object PermissionManager {
         lateinit var reject:  (Throwable) -> Unit
             private set
 
-        val promise = Promise<Permissions.Result> { resolve, reject ->
+        val promise = Promise<Permissions.Result>(ChildCancelMode.ANY) { resolve, reject ->
             this.resolve = resolve
             this.reject  = reject
         }
     }
 }
+
+private const val PERMISSION_TIMEOUT = 15000L // 15 sec

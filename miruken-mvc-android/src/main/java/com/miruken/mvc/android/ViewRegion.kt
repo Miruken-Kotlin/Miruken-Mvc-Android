@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.RelativeLayout
 import com.miruken.callback.*
+import com.miruken.concurrent.ChildCancelMode
 import com.miruken.concurrent.Promise
 import com.miruken.event.Event
 import com.miruken.mvc.Navigation
@@ -257,42 +258,41 @@ class ViewRegion : ViewContainer, ViewingStackView {
             view = null
         }
 
-        override fun duration(
-                durationMillis: Long,
-                done: (Boolean) -> Unit
-        ): () -> Unit {
-            val guard = AtomicBoolean(false)
+        override fun duration(durationMillis: Long): Promise<Boolean> {
+            return Promise(ChildCancelMode.ANY) { resolve, _, onCancel ->
+                val guard = AtomicBoolean(false)
 
-            var cancelTransition: (() -> Unit)? = null
-            var cancelDisposed:   (() -> Unit)? = null
+                var cancelTransition: (() -> Unit)? = null
+                var cancelDisposed:   (() -> Unit)? = null
 
-            lateinit var expired: Runnable
+                lateinit var expired: Runnable
 
-            val stopTimer = { cancelled: Boolean, complete: Boolean ->
-                if (guard.compareAndSet(false, true)) {
-                    cancelTransition?.invoke()
-                    cancelDisposed?.invoke()
-                    AndroidThreading.mainHandler.removeCallbacks(expired)
-                    if (complete) done(cancelled)
+                val stopTimer = { cancelled: Boolean, complete: Boolean ->
+                    if (guard.compareAndSet(false, true)) {
+                        cancelTransition?.invoke()
+                        cancelDisposed?.invoke()
+                        AndroidThreading.mainHandler.removeCallbacks(expired)
+                        if (complete) resolve(cancelled)
+                    }
+                }
+
+                onCancel { stopTimer(true, true) }
+
+                expired = Runnable { stopTimer(false, true) }
+
+                if (!AndroidThreading.mainHandler.postDelayed(
+                                expired, durationMillis)) {
+                    stopTimer(false, true)
+                }
+
+                cancelTransition = transitioned.register {
+                    stopTimer(true, false)
+                }
+
+                cancelDisposed = transitioned.register {
+                    stopTimer(false, false)
                 }
             }
-
-            expired = Runnable { stopTimer(false, true) }
-
-            if (!AndroidThreading.mainHandler.postDelayed(
-                    expired, durationMillis)) {
-                stopTimer(false, true)
-            }
-
-            cancelTransition = transitioned.register {
-                stopTimer(true, false)
-            }
-
-            cancelDisposed = transitioned.register {
-                stopTimer(false, false)
-            }
-
-            return { stopTimer(true, true) }
         }
 
         override fun close() {

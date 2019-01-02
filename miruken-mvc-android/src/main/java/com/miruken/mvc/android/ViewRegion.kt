@@ -43,10 +43,7 @@ class ViewRegion : ViewContainer, ViewingStackView {
     override fun createViewStack() =
             ViewRegion(context).apply { _isChild = true }
 
-    override fun show(
-            view:     Viewing,
-            composer: Handling
-    ): ViewingLayer {
+    override fun show(view: Viewing, composer: Handling): ViewingLayer {
         var push         = false
         var overlay      = false
         val navigation   = composer.resolve<Navigation<*>>()
@@ -78,9 +75,16 @@ class ViewRegion : ViewContainer, ViewingStackView {
             } else {
                 pushLayer()
             }
+        } else if (layer == null) {
+            layer = (navigation?.viewLayer as? ViewLayer)?.takeIf {
+                _layers.contains(it)
+            }
         }
 
         return (layer ?: activeLayer)?.apply {
+            if (navigation?.viewLayer == null) {
+                navigation?.viewLayer = this
+            }
             val bv = bindView(view, this, navigation)
             transitionTo(view to bv, options, composer)
         } ?: error("Unable to determine the view layer")

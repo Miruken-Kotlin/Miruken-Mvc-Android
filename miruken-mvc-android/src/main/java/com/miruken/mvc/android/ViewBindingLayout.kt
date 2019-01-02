@@ -13,8 +13,7 @@ class ViewBindingLayout<B: ViewDataBinding>(
         override       var viewModel: Any? = null,
         private        val initView: (View.(binding: B) -> Unit)? = null
 ) : Viewing {
-    override fun display(region: ViewingRegion) =
-            region.show(this)
+    override fun display(region: ViewingRegion) = region.show(this)
 
     fun bind(view: View, binding: ViewDataBinding) {
         check(viewModel != null) {

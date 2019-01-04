@@ -9,6 +9,14 @@ object AndroidThreading {
     val mainHandler: Handler = Handler(mainLooper)
     val mainThread:  Thread  = mainLooper.thread
 
+    fun postOnMainThread(block: () -> Unit) {
+        if (Thread.currentThread() != mainThread) {
+            mainHandler.post(block)
+        } else {
+            block()
+        }
+    }
+
     fun <T: Any?> runOnMainThread(block: () -> T): T =
             if (Thread.currentThread() != mainThread) {
                 val task = FutureTask<T>(block)

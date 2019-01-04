@@ -20,19 +20,36 @@ class LifecycleProvider(val lifecycle: Lifecycle) : FilteringProvider {
             filterType: KType,
             composer:   Handling
     ): List<Filtering<*,*>> {
-        return if (isQualified(binding)) {
-            listOf(LifecycleFilter)
-        } else emptyList()
+        return binding.returnType.jvmErasure.let {
+            if (it.isSubclassOf(LifecycleAware::class)) {
+                listOf(LifecycleAwareFilter)
+            } else if (it.isSubclassOf(LifecycleObserver::class) &&
+                       it.isSubclassOf(Contextual::class)) {
+                listOf(LifecycleObserverFilter)
+            } else {
+                emptyList()
+            }
+        }
     }
 
-    private fun isQualified(binding: MemberBinding) =
-            binding.returnType.jvmErasure.let {
-                it.isSubclassOf(LifecycleAware::class) ||
-                (it.isSubclassOf(LifecycleObserver::class) &&
-                 it.isSubclassOf(Contextual::class))
-            }
+    private object LifecycleAwareFilter : Filtering<Inquiry, LifecycleAware> {
+        override var order: Int? = null
 
-    private object LifecycleFilter : Filtering<Inquiry, LifecycleObserver> {
+        override fun next(
+                callback: Inquiry,
+                binding:  MemberBinding,
+                composer: Handling,
+                next:     Next<LifecycleAware>,
+                provider: FilteringProvider?
+        ) = next().also {
+            it then { observer ->
+                val lifecycle = (provider as LifecycleProvider).lifecycle
+                observer.lifecycle = lifecycle
+            }
+        }
+    }
+
+    private object LifecycleObserverFilter : Filtering<Inquiry, LifecycleObserver> {
         override var order: Int? = null
 
         override fun next(
@@ -42,17 +59,16 @@ class LifecycleProvider(val lifecycle: Lifecycle) : FilteringProvider {
                 next:     Next<LifecycleObserver>,
                 provider: FilteringProvider?
         ) = next().also {
-                it then { observer ->
+            it then { observer ->
+                (observer as Contextual).context?.also { ctx ->
                     val lifecycle = (provider as LifecycleProvider).lifecycle
-                    (observer as? LifecycleAware)?.lifecycle = lifecycle
-                    (observer as? Contextual)?.context?.also { ctx ->
-                        lifecycle.addObserver(observer)
-                        ctx.contextEnded.register {
-                            lifecycle.removeObserver(observer)
-                        }
+                    lifecycle.addObserver(observer)
+                    ctx.contextEnded.register {
+                        lifecycle.removeObserver(observer)
                     }
                 }
             }
+        }
     }
 }
 

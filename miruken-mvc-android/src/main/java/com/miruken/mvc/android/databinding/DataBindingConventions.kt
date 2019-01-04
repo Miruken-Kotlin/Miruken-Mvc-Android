@@ -1,9 +1,8 @@
 package com.miruken.mvc.android.databinding
 
+import android.os.SystemClock
 import android.view.View
 import androidx.databinding.DataBindingComponent
-import android.os.SystemClock
-import android.widget.ImageView
 
 object DataBindingConventions : DataBindingComponent {
     override fun getClickBindings() = ClickingBindingsAdapter

@@ -10,8 +10,7 @@ class ViewLayout(
         override   var viewModel: Any? = null,
         private    val initView: (View.() -> Unit)? = null
 ) : Viewing {
-    override fun display(region: ViewingRegion) =
-            region.show(this)
+    override fun display(region: ViewingRegion) = region.show(this)
 
     fun init(view: View) = initView?.invoke(view)
 }

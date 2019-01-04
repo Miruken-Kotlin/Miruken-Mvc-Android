@@ -64,9 +64,13 @@ abstract class ViewContainer :
     abstract fun show(view: Viewing, composer: Handling): ViewingLayer
 
     override fun presentKeyboard(focus: View?) =
-            (focus ?: this).showKeyboard()
+            AndroidThreading.runOnMainThread {
+                (focus ?: this).showKeyboard()
+            }
 
-    override fun dismissKeyboard() = hideKeyboard()
+    override fun dismissKeyboard() = AndroidThreading.runOnMainThread {
+        hideKeyboard()
+    }
 
     protected fun inflateLayout(layout: ViewLayout): View =
         View.inflate(context, layout.layoutId, null).apply {

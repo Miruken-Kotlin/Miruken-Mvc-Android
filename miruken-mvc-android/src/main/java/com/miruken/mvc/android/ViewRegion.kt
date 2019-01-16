@@ -189,8 +189,7 @@ class ViewRegion : ViewContainer, ViewingStackView {
         }
         return when (view) {
             is View -> view
-            is ViewLayout -> inflateLayout(view)
-            is ViewBindingLayout<*> -> inflateBinding(view)
+            is ViewProvider -> view.createView(context, this)
             else -> notHandled()
         }
     }

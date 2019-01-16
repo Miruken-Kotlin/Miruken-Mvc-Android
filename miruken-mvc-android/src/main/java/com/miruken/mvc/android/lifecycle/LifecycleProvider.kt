@@ -36,11 +36,12 @@ class LifecycleProvider(val lifecycle: Lifecycle) : FilteringProvider {
         override var order: Int? = null
 
         override fun next(
-                callback: Inquiry,
-                binding:  MemberBinding,
-                composer: Handling,
-                next:     Next<LifecycleAware>,
-                provider: FilteringProvider?
+                callback:    Inquiry,
+                rawCallback: Any,
+                binding:     MemberBinding,
+                composer:    Handling,
+                next:        Next<LifecycleAware>,
+                provider:    FilteringProvider?
         ) = next().also {
             it then { observer ->
                 val lifecycle = (provider as LifecycleProvider).lifecycle
@@ -53,11 +54,12 @@ class LifecycleProvider(val lifecycle: Lifecycle) : FilteringProvider {
         override var order: Int? = null
 
         override fun next(
-                callback: Inquiry,
-                binding:  MemberBinding,
-                composer: Handling,
-                next:     Next<LifecycleObserver>,
-                provider: FilteringProvider?
+                callback:    Inquiry,
+                rawCallback: Any,
+                binding:     MemberBinding,
+                composer:    Handling,
+                next:        Next<LifecycleObserver>,
+                provider:    FilteringProvider?
         ) = next().also {
             it then { observer ->
                 (observer as Contextual).context?.also { ctx ->

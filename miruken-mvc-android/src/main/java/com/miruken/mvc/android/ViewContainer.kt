@@ -72,20 +72,6 @@ abstract class ViewContainer :
         hideKeyboard()
     }
 
-    protected fun inflateLayout(layout: ViewLayout): View =
-        View.inflate(context, layout.layoutId, null).apply {
-            layout.init(this)
-        }
-
-    protected fun inflateBinding(layout: ViewBindingLayout<*>): View {
-        val inflater = LayoutInflater.from(context)
-        val binding  = DataBindingUtil.inflate<ViewDataBinding>(
-                inflater, layout.layoutId, this, false,
-                DataBindingConventions)
-        layout.bind(binding.root, binding)
-        return binding.root
-    }
-
     private fun createView(viewClass: KClass<*>): Viewing? {
         if (!viewClass.isSubclassOf(Viewing::class) ||
                 viewClass.java.isInterface ||

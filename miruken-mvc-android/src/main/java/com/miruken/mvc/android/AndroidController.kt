@@ -6,7 +6,9 @@ import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ViewDataBinding
+import androidx.fragment.app.Fragment
 import com.miruken.callback.Handling
+import com.miruken.callback.resolve
 import com.miruken.context.requireContext
 import com.miruken.mvc.Controller
 import com.miruken.mvc.android.databinding.NotifiableObservable
@@ -85,6 +87,19 @@ open class AndroidController : Controller(),
             viewModel: Any? = null,
             init:      (View.(binding: B) -> Unit)? = null
     ) = show(handler, ViewBindingLayout(layoutId, viewModelId, viewModel, init))
+
+    protected fun showFragment(fragment: Fragment) =
+            show(FragmentViewAdapter(fragment))
+
+    protected fun showFragment(handler: Handling, fragment: Fragment) =
+            show(handler, FragmentViewAdapter(fragment))
+
+    protected inline fun <reified F: Fragment> showFragment() =
+            showFragment<F>(io)
+
+    protected inline fun <reified F: Fragment> showFragment(handler: Handling) =
+            show(handler, FragmentViewAdapter(io.resolve<F>() ?:
+                error("Unable to resolve Fragment ${F::class}")))
 
     // Keyboard
 

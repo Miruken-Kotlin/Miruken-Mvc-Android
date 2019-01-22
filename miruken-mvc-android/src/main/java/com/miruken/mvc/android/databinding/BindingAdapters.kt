@@ -11,6 +11,13 @@ fun setVisibility(view: View, value: Boolean?) {
     }
 }
 
+@BindingAdapter("android:displayed")
+fun setDisplayed(view: View, value: Boolean?) {
+    value?.apply {
+        view.visibility = if (value) View.VISIBLE else View.GONE
+    }
+}
+
 @BindingAdapter("android:src")
 fun setImage(view: ImageView, value: Int?) {
     value?.apply {

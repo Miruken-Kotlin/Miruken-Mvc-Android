@@ -1,6 +1,8 @@
 package com.miruken.mvc.android
 
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.TranslateAnimation
 import androidx.annotation.CallSuper
 import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
@@ -100,6 +102,15 @@ open class AndroidController : Controller(),
     protected inline fun <reified F: Fragment> showFragment(handler: Handling) =
             show(handler, FragmentViewAdapter(io.resolve<F>() ?:
                 error("Unable to resolve Fragment ${F::class}")))
+
+    protected fun shake(view: View, duration: Long, offset: Int, repeat: Int): View {
+        val anim = TranslateAnimation((-offset).toFloat(), offset.toFloat(), 0f, 0f)
+        anim.duration    = duration
+        anim.repeatMode  = Animation.REVERSE
+        anim.repeatCount = repeat
+        view.startAnimation(anim)
+        return view
+    }
 
     // Keyboard
 

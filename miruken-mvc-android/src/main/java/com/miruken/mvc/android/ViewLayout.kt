@@ -4,7 +4,9 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
+import com.miruken.mvc.Navigation
 import com.miruken.mvc.view.Viewing
+import com.miruken.mvc.view.ViewingLayer
 import com.miruken.mvc.view.ViewingRegion
 
 class ViewLayout(
@@ -14,7 +16,11 @@ class ViewLayout(
 ) : Viewing, ViewProvider {
     override fun display(region: ViewingRegion) = region.show(this)
 
-    override fun createView(context: Context, parent: ViewGroup): View =
+    override fun createView(
+            context:    Context,
+            parent:     ViewGroup,
+            navigation: Navigation<*>?
+    ): View =
         View.inflate(context, layoutId, null).apply {
             initView?.invoke(this)
     }

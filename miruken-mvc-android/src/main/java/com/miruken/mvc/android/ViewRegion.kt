@@ -189,7 +189,7 @@ class ViewRegion : ViewContainer, ViewingStackView {
         }
         return when (view) {
             is View -> view
-            is ViewProvider -> view.createView(context, this)
+            is ViewProvider -> view.createView(context, this, navigation)
             else -> notHandled()
         }
     }

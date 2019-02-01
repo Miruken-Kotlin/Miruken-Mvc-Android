@@ -2,12 +2,13 @@ package com.miruken.mvc.android
 
 import android.content.Context
 import android.view.LayoutInflater
-import androidx.databinding.ViewDataBinding
-import androidx.annotation.IdRes
-import androidx.annotation.LayoutRes
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.IdRes
+import androidx.annotation.LayoutRes
 import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
+import com.miruken.mvc.Navigation
 import com.miruken.mvc.android.databinding.DataBindingConventions
 import com.miruken.mvc.view.Viewing
 import com.miruken.mvc.view.ViewingRegion
@@ -20,7 +21,11 @@ class ViewBindingLayout<B: ViewDataBinding>(
 ) : Viewing, ViewProvider {
     override fun display(region: ViewingRegion) = region.show(this)
 
-    override fun createView(context: Context, parent: ViewGroup): View {
+    override fun createView(
+            context:    Context,
+            parent:     ViewGroup,
+            navigation: Navigation<*>?
+    ): View {
         val inflater = LayoutInflater.from(context)
         val binding  = DataBindingUtil.inflate<ViewDataBinding>(
                 inflater, layoutId, parent, false,

@@ -44,17 +44,17 @@ class ViewRegion : ViewContainer, ViewingStackView {
             ViewRegion(context).apply { _isChild = true }
 
     override fun show(view: Viewing, composer: Handling): ViewingLayer {
-        var push         = false
-        var overlay      = false
-        val navigation   = composer.resolve<Navigation<*>>()
-        val options      = composer.getOptions(NavigationOptions())
-        val layerOptions = options?.region
+        var push          = false
+        var overlay       = false
+        val navigation    = composer.resolve<Navigation<*>>()
+        val options       = composer.getOptions(NavigationOptions())
+        val regionOptions = options?.region
 
         var layer: ViewLayer? = null
 
         if (_layers.isEmpty()) {
             push = true
-        } else layerOptions?.also {
+        } else regionOptions?.also {
             when {
                 it.push == true -> push = true
                 it.overlay == true -> {

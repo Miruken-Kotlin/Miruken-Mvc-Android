@@ -17,7 +17,7 @@ class ViewBindingLayout<B: ViewDataBinding>(
         @LayoutRes     val layoutId:    Int,
         @IdRes private val viewModelId: Int,
         override       var viewModel: Any? = null,
-        private        val initView: (View.(binding: B) -> Unit)? = null
+        private        val initView: ((B) -> Unit)? = null
 ) : Viewing, ViewProvider {
     override fun display(region: ViewingRegion) = region.show(this)
 
@@ -30,11 +30,11 @@ class ViewBindingLayout<B: ViewDataBinding>(
         val binding  = DataBindingUtil.inflate<ViewDataBinding>(
                 inflater, layoutId, parent, false,
                 DataBindingConventions)
-        bind(binding.root, binding)
+        bind(binding)
         return binding.root
     }
 
-    private fun bind(view: View, binding: ViewDataBinding) {
+    private fun bind(binding: ViewDataBinding) {
         check(viewModel != null) {
             "A view model is required to bind the layout"
         }
@@ -42,6 +42,6 @@ class ViewBindingLayout<B: ViewDataBinding>(
             "Unable to bind the view model to layout $layoutId.  Did you forget to add a data variable for the view model?"
         }
         @Suppress("UNCHECKED_CAST")
-        initView?.invoke(view, binding as B)
+        initView?.invoke(binding as B)
     }
 }

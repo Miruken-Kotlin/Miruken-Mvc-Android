@@ -50,21 +50,21 @@ open class AndroidController : Controller(),
     protected fun showR(
             @LayoutRes layoutId: Int,
             viewModel: Any? = null,
-            init:      (View.() -> Unit)? = null
+            init:      ((View) -> Unit)? = null
     ) = show(ViewLayout(layoutId, viewModel, init))
 
     protected fun showR(
             handler:   Handling,
             @LayoutRes layoutId: Int,
             viewModel: Any? = null,
-            init:      (View.() -> Unit)? = null
+            init:      ((View) -> Unit)? = null
     ) = show(handler, ViewLayout(layoutId, viewModel, init))
 
     protected fun showR(
             @LayoutRes layoutId:    Int,
             @IdRes     viewModelId: Int,
             viewModel: Any? = null,
-            init:      (View.(binding: ViewDataBinding) -> Unit)? = null
+            init:      ((ViewDataBinding) -> Unit)? = null
     ) = show(ViewBindingLayout(layoutId, viewModelId, viewModel, init))
 
     protected fun showR(
@@ -72,14 +72,14 @@ open class AndroidController : Controller(),
             @LayoutRes layoutId:    Int,
             @IdRes     viewModelId: Int,
             viewModel: Any? = null,
-            init:      (View.(binding: ViewDataBinding) -> Unit)? = null
+            init:      ((ViewDataBinding) -> Unit)? = null
     ) = show(handler, ViewBindingLayout(layoutId, viewModelId, viewModel, init))
 
     protected fun <B: ViewDataBinding> show(
             @LayoutRes layoutId:    Int,
             @IdRes     viewModelId: Int,
             viewModel: Any? = null,
-            init:      (View.(binding: B) -> Unit)? = null
+            init:      ((B) -> Unit)? = null
     ) = show(ViewBindingLayout(layoutId, viewModelId, viewModel, init))
 
     protected fun <B: ViewDataBinding> show(
@@ -87,7 +87,7 @@ open class AndroidController : Controller(),
             @LayoutRes layoutId:    Int,
             @IdRes     viewModelId: Int,
             viewModel: Any? = null,
-            init:      (View.(binding: B) -> Unit)? = null
+            init:      ((B) -> Unit)? = null
     ) = show(handler, ViewBindingLayout(layoutId, viewModelId, viewModel, init))
 
     protected fun showFragment(fragment: Fragment) =

@@ -13,7 +13,7 @@ import com.miruken.protocol.proxy
 fun Handling.overlayR(
         @LayoutRes layoutId: Int,
         viewModel: Any? = null,
-        init:      (View.() -> Unit)? = null
+        init:      ((View) -> Unit)? = null
 ) = aspectBefore({ _, composer ->
     composer.overlay.proxy<ViewingRegion>()
             .show(ViewLayout(layoutId, viewModel, init))
@@ -23,7 +23,7 @@ fun Handling.overlayR(
         @LayoutRes layoutId:    Int,
         @IdRes     viewModelId: Int,
         viewModel: Any? = null,
-        init:      (View.(binding: ViewDataBinding) -> Unit)? = null
+        init:      ((ViewDataBinding) -> Unit)? = null
 ) = aspectBefore({ _, composer ->
     composer.overlay.proxy<ViewingRegion>()
             .show(ViewBindingLayout(layoutId, viewModelId, viewModel, init))
@@ -33,7 +33,7 @@ fun <B: ViewDataBinding> Handling.overlay(
         @LayoutRes layoutId:    Int,
         @IdRes     viewModelId: Int,
         viewModel: Any? = null,
-        init:      (View.(binding: B) -> Unit)? = null
+        init:      ((B) -> Unit)? = null
 ) = aspectBefore({ _, composer ->
     composer.overlay.proxy<ViewingRegion>()
             .show(ViewBindingLayout(layoutId, viewModelId, viewModel, init))

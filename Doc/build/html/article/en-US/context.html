@@ -1,0 +1,265 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Context &mdash; Miruken-Mvc-Kotlin  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Miruken-Mvc-Kotlin  documentation" href="../../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Miruken-Mvc-Kotlin
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Context</a><ul>
+<li><a class="reference internal" href="#hierarchical">Hierarchical</a></li>
+<li><a class="reference internal" href="#context-traversal">Context Traversal</a></li>
+<li><a class="reference internal" href="#lifecycle">Lifecycle</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Miruken-Mvc-Kotlin</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li>Context</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/article/en-US/context.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="context">
+<h1>Context<a class="headerlink" href="#context" title="Permalink to this headline">¶</a></h1>
+<p>The context is one of the three major components of Miruken.  The other two major components being the protocol and the handler.</p>
+<p>In this example we are simply creating a new context:</p>
+<p>At the simplest level a context is a collection of handlers.</p>
+<img alt="article/en-US/../../img/context/collectionOfHandlers.png" src="article/en-US/../../img/context/collectionOfHandlers.png" />
+<p>Here we are instantiating handlers and adding them to the context:</p>
+<p>You can also rely on a container to create the handler instances.  We like to use Castle Windsor,
+but as you can see by this example you can use any container you want.
+All you need is a handler in the context that implements <cite>IContainer</cite>
+and it will create the handler instances for you. My simple container here just instantiates instances and returns them.</p>
+<div class="section" id="hierarchical">
+<h2>Hierarchical<a class="headerlink" href="#hierarchical" title="Permalink to this headline">¶</a></h2>
+<p>Contexts are also hierarchical. They have a context graph witch mean they know their parent and can create children.</p>
+<img alt="article/en-US/../../img/context/hierarchical.png" src="article/en-US/../../img/context/hierarchical.png" />
+<p>In this example we use the CreateChild() method to create a child context from an existing context:</p>
+</div>
+<div class="section" id="context-traversal">
+<h2>Context Traversal<a class="headerlink" href="#context-traversal" title="Permalink to this headline">¶</a></h2>
+<p>Context traversal is the concept of finding a handler for a message in the current context graph.</p>
+<p>SelfOrAncestor is the default TraversingAxis which means that when Miruken is trying to handle a message it starts with the current context. If the current context cannot handle the message, the message will be passed to the parent to be handled. There are several other TraversingAxis. You can see them all described below.</p>
+<img alt="article/en-US/../../img/context/selfOrAncestor.png" src="article/en-US/../../img/context/selfOrAncestor.png" />
+<img alt="article/en-US/../../img/context/ancestor.png" src="article/en-US/../../img/context/ancestor.png" />
+<img alt="article/en-US/../../img/context/child.png" src="article/en-US/../../img/context/child.png" />
+<img alt="article/en-US/../../img/context/descendant.png" src="article/en-US/../../img/context/descendant.png" />
+<img alt="article/en-US/../../img/context/descendantReversed.png" src="article/en-US/../../img/context/descendantReversed.png" />
+<img alt="article/en-US/../../img/context/root.png" src="article/en-US/../../img/context/root.png" />
+<img alt="article/en-US/../../img/context/self.png" src="article/en-US/../../img/context/self.png" />
+<img alt="article/en-US/../../img/context/selfOrChild.png" src="article/en-US/../../img/context/selfOrChild.png" />
+<img alt="article/en-US/../../img/context/selfOrDescendant.png" src="article/en-US/../../img/context/selfOrDescendant.png" />
+<img alt="article/en-US/../../img/context/selfOrDescendantReversed.png" src="article/en-US/../../img/context/selfOrDescendantReversed.png" />
+<img alt="article/en-US/../../img/context/selfOrSibling.png" src="article/en-US/../../img/context/selfOrSibling.png" />
+<img alt="article/en-US/../../img/context/selfSiblingOrAncestor.png" src="article/en-US/../../img/context/selfSiblingOrAncestor.png" />
+<img alt="article/en-US/../../img/context/sibling.png" src="article/en-US/../../img/context/sibling.png" />
+</div>
+<div class="section" id="lifecycle">
+<h2>Lifecycle<a class="headerlink" href="#lifecycle" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Context.End</li>
+<li>Context.Ended</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016-2019, Miruken.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

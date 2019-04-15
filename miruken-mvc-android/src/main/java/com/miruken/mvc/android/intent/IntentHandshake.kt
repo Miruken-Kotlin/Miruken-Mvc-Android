@@ -3,6 +3,7 @@ package com.miruken.mvc.android.intent
 import android.app.Activity
 import android.content.Intent
 import com.miruken.concurrent.Promise
+import java.lang.IllegalStateException
 import java.util.concurrent.ConcurrentHashMap
 
 object IntentHandshake {
@@ -10,14 +11,14 @@ object IntentHandshake {
     private val pending = ConcurrentHashMap<Int, Pending>()
 
     fun initiateIntent(intent: Intent, activity: Activity): Promise<Intent?> {
-        intent.resolveActivity(activity.packageManager)?.also {
+        return intent.resolveActivity(activity.packageManager)?.let {
             val requestId = getNextId()
             val request   = Pending().apply { pending[requestId] = this }
             activity.startActivityForResult(intent, requestId)
-            return request.promise finally {
-                pending.remove(requestId)
-            }
-        }
+            request.promise finally { pending.remove(requestId) }
+        } ?: Promise.reject(IllegalStateException(
+                "Unable to resolve activity for Intent"
+        ))
     }
 
     fun completeIntent(requestId: Int, resultCode: Int, data: Intent?) {

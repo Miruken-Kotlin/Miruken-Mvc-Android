@@ -1,8 +1,10 @@
 package com.miruken.mvc.android
 
 import androidx.appcompat.app.AppCompatActivity
+import com.miruken.Initializing
 import com.miruken.TypeReference
 import com.miruken.addSorted
+import com.miruken.callback.InitializeProvider
 import com.miruken.callback.policy.*
 import com.miruken.callback.policy.bindings.PolicyMemberBinding
 import com.miruken.callback.policy.bindings.PolicyMemberBindingInfo
@@ -17,6 +19,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
+import kotlin.reflect.full.isSubclassOf
 
 class FixedHandlerDescriptorFactory(
         descriptors: Collection<HandlerDescriptor>
@@ -202,6 +205,9 @@ class FixedHandlerDescriptorFactory(
                                 outKey = constructor.returnType
                             }
                             val binding = it.bindMethod(bindingInfo)
+                            if (handlerClass.isSubclassOf(Initializing::class)) {
+                                binding.addFilters(InitializeProvider)
+                            }
                             if (typePolicies == null) {
                                 typePolicies = mutableMapOf()
                             }

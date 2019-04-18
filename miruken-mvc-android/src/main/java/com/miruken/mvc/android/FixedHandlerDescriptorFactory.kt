@@ -117,31 +117,43 @@ class FixedHandlerDescriptorFactory(
                 resourceName: String,
                 visitor:      HandlerDescriptorVisitor? = null,
                 done:         suspend CoroutineScope.() -> Unit
+        ) {
+            registerHandlers(activity, arrayOf(resourceName), visitor, done)
+        }
+
+        fun registerHandlers(
+                activity:      AppCompatActivity,
+                resourceNames: Array<String>,
+                visitor:       HandlerDescriptorVisitor? = null,
+                done:          suspend CoroutineScope.() -> Unit
         ) = GlobalScope.launch {
             val resources = activity.resources
             val begin = System.currentTimeMillis()
-            val id = resources.getIdentifier(resourceName, "raw", activity.packageName)
-            BufferedReader(InputStreamReader(resources.openRawResource(id)))
-                    .use { it.readLines() }.map { line -> async {
-                        val start           = System.currentTimeMillis()
-                        val members         = line.split(";").filter { it.isNotBlank() }
-                        val handler         = members[0]
-                        val methods         = members.drop(1)
-                        val hasMethods      = methods.any { !it.startsWith("<init>") }
-                        val hasConstructors = methods.any { it.startsWith("<init>") }
-                        val handlerClass    = Class.forName(handler).kotlin
-                        createDescriptor(handlerClass, hasMethods, hasConstructors, visitor).also {
-                            val time = System.currentTimeMillis() - start
-                            Timber.d("Register handler '$handlerClass' took ($time ms) ${Thread.currentThread().name}")
+
+            resourceNames.forEach { resourceName ->
+                val id = resources.getIdentifier(resourceName, "raw", activity.packageName)
+                BufferedReader(InputStreamReader(resources.openRawResource(id)))
+                        .use { it.readLines() }.map { line -> async {
+                            val start           = System.currentTimeMillis()
+                            val members         = line.split(";").filter { it.isNotBlank() }
+                            val handler         = members[0]
+                            val methods         = members.drop(1)
+                            val hasMethods      = methods.any { !it.startsWith("<init>") }
+                            val hasConstructors = methods.any { it.startsWith("<init>") }
+                            val handlerClass    = Class.forName(handler).kotlin
+                            createDescriptor(handlerClass, hasMethods, hasConstructors, visitor).also {
+                                val time = System.currentTimeMillis() - start
+                                Timber.d("Register handler '$handlerClass' took ($time ms) ${Thread.currentThread().name}")
+                            }
                         }
-                    }
-                    }.map { it.await() }.also {
-                        HandlerDescriptorFactory.useFactory(FixedHandlerDescriptorFactory(it))
-                    }.also {
-                        val total = System.currentTimeMillis() - begin
-                        Timber.d("Registered ${it.size} handlers in ($total ms) ${Thread.currentThread().name}")
-                        withContext(Dispatchers.Main, done)
-                    }
+                        }.map { it.await() }.also {
+                            HandlerDescriptorFactory.useFactory(FixedHandlerDescriptorFactory(it))
+                        }.also {
+                            val total = System.currentTimeMillis() - begin
+                            Timber.d("Registered ${it.size} handlers in ($total ms) ${Thread.currentThread().name}")
+                            withContext(Dispatchers.Main, done)
+                        }
+            }
         }
 
         private fun createDescriptor(

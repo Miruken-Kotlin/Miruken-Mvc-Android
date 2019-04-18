@@ -128,7 +128,7 @@ class FixedHandlerDescriptorFactory(
                 done:          suspend CoroutineScope.() -> Unit
         ) = GlobalScope.launch {
             val resources = activity.resources
-            val begin = System.currentTimeMillis()
+            val begin     = System.currentTimeMillis()
 
             resourceNames.flatMap { resourceName ->
                 val id = resources.getIdentifier(resourceName, "raw", activity.packageName)

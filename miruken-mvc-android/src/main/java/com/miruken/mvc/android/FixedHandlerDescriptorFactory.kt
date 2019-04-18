@@ -118,19 +118,20 @@ class FixedHandlerDescriptorFactory(
                 visitor:      HandlerDescriptorVisitor? = null,
                 done:         suspend CoroutineScope.() -> Unit
         ) {
-            registerHandlers(activity, arrayOf(resourceName), visitor, done)
+            registerHandlers(activity, listOf(resourceName), visitor, done)
         }
 
         fun registerHandlers(
                 activity:      AppCompatActivity,
-                resourceNames: Array<String>,
+                resourceNames: Collection<String>,
                 visitor:       HandlerDescriptorVisitor? = null,
                 done:          suspend CoroutineScope.() -> Unit
         ) = GlobalScope.launch {
             val resources = activity.resources
-            val begin = System.currentTimeMillis()
+            val descriptors = mutableListOf<HandlerDescriptor>()
 
             resourceNames.forEach { resourceName ->
+                val begin = System.currentTimeMillis()
                 val id = resources.getIdentifier(resourceName, "raw", activity.packageName)
                 BufferedReader(InputStreamReader(resources.openRawResource(id)))
                         .use { it.readLines() }.map { line -> async {
@@ -147,13 +148,14 @@ class FixedHandlerDescriptorFactory(
                             }
                         }
                         }.map { it.await() }.also {
-                            HandlerDescriptorFactory.useFactory(FixedHandlerDescriptorFactory(it))
-                        }.also {
+                            descriptors.addAll(it)
                             val total = System.currentTimeMillis() - begin
                             Timber.d("Registered ${it.size} handlers in ($total ms) ${Thread.currentThread().name}")
                             withContext(Dispatchers.Main, done)
                         }
             }
+
+            HandlerDescriptorFactory.useFactory(FixedHandlerDescriptorFactory(descriptors))
         }
 
         private fun createDescriptor(

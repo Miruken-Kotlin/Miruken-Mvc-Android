@@ -25,9 +25,7 @@ class FixedHandlerDescriptorFactory(
         descriptors: Collection<HandlerDescriptor>
 ) : HandlerDescriptorFactory {
 
-    private val _descriptors =
-            descriptors.associateBy { it.handlerClass }
-
+    private val _descriptors  = descriptors.associateBy { it.handlerClass }
     private val _handlerCache = ConcurrentHashMap<HandlerCacheKey, List<KType>>()
 
     override fun getDescriptor(handlerClass: KClass<*>) = _descriptors[handlerClass]
@@ -131,6 +129,7 @@ class FixedHandlerDescriptorFactory(
                 done:          suspend CoroutineScope.() -> Unit
         ) = GlobalScope.launch {
             val resources = activity.resources
+            val handlers  = ConcurrentHashMap.newKeySet<String>()
             val begin     = System.currentTimeMillis()
 
             resourceNames.flatMap { resourceName ->
@@ -140,6 +139,7 @@ class FixedHandlerDescriptorFactory(
                             val start           = System.currentTimeMillis()
                             val members         = line.split(";").filter { it.isNotBlank() }
                             val handler         = members[0]
+                            if (!handlers.add(handler)) return@async null
                             val methods         = members.drop(1)
                             val hasMethods      = methods.any { !it.startsWith("<init>") }
                             val hasConstructors = methods.any { it.startsWith("<init>") }
@@ -149,7 +149,7 @@ class FixedHandlerDescriptorFactory(
                                 Timber.d("Register handler '$handlerClass' took ($time ms) ${Thread.currentThread().name}")
                             }
                         }
-                    }.map { it.await() }
+                    }.mapNotNull { it.await() }
             }.also {
                 HandlerDescriptorFactory.useFactory(FixedHandlerDescriptorFactory(it))
             }.also {

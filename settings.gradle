@@ -1,1 +1,2 @@
-include ':miruken-mvc-android'
+include ':miruken-mvc-android',
+        ':miruken-gradle-android'

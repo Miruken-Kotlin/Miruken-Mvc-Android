@@ -1,0 +1,42 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+}
+
+apply from: "${rootDir}/gradle/kotlin.gradle"
+
+gradlePlugin {
+    plugins {
+        mirukenPlugin {
+            id                  = 'com.miruken.android'
+            implementationClass = 'com.miruken.MirukenPlugin'
+        }
+    }
+}
+
+dependencies {
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    implementation 'com.android.tools.build:gradle:3.3.2'
+    implementation 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.30'
+    implementation 'io.github.classgraph:classgraph:4.8.25'
+}
+
+def artifactName = 'miruken-gradle-android'
+
+publishing {
+    repositories {
+        maven {
+            name="test"
+            url = uri("$buildDir/repo")
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            groupId    mirukenGroupId
+            artifactId artifactName
+            version    "0.0.36"
+        }
+    }
+}

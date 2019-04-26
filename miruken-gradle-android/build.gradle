@@ -4,6 +4,7 @@ plugins {
     id 'maven-publish'
 }
 
+apply plugin: 'com.jfrog.bintray'
 apply from: "${rootDir}/gradle/kotlin.gradle"
 
 gradlePlugin {
@@ -19,7 +20,7 @@ dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
     implementation 'com.android.tools.build:gradle:3.3.2'
     implementation 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.30'
-    implementation 'io.github.classgraph:classgraph:4.8.25'
+    implementation 'io.github.classgraph:classgraph:4.8.26'
 }
 
 def artifactName = 'miruken-gradle-android'
@@ -36,7 +37,23 @@ publishing {
             from components.java
             groupId    mirukenGroupId
             artifactId artifactName
-            version    "0.0.36"
+        }
+    }
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key  = System.getenv('BINTRAY_KEY')
+    publications = ['maven']
+    publish = true
+    pkg {
+        name     = artifactName
+        userOrg  = mirukenOrg
+        repo     = mirukenRepo
+        licenses = [mirukenLicense]
+        vcsUrl   = mirukenVcsUrl
+        version {
+            released = new Date()
         }
     }
 }

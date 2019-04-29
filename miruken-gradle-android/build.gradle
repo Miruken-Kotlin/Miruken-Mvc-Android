@@ -30,6 +30,7 @@ publishing {
         maven {
             name="test"
             url = uri("$buildDir/repo")
+            version = '0.0.12'
         }
     }
     publications {

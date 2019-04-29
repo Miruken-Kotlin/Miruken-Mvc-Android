@@ -6,23 +6,22 @@ import io.github.classgraph.ClassGraph
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.gradle.api.provider.Property
 
 open class FindMirukenHandlersTask : DefaultTask() {
 
     private val sep           = java.io.File.separator
-    private val projectName   = project.name.toLowerCase().replace("-", "_")
     private val mirukenDir    = "${project.buildDir}${sep}generated${sep}source${sep}miruken$sep"
-            val resDir        = "${mirukenDir}res$sep"
+    private val resDir        = "${mirukenDir}res$sep"
     private val rawDir        = "${resDir}raw$sep"
 
     private var targetVariant = "Debug"
     private var studioBuild   = true
 
-    private val resourceName
-        get() = "${projectName}_handlers"
+    val resourceName:Property<String> = project.objects.property(String::class.java)
 
     private val scanResult
-        get() = "$rawDir$resourceName.txt"
+        get() = "$rawDir${resourceName.get()}.txt"
 
     private val compileTask : KotlinCompile
         get() = try {
@@ -111,7 +110,7 @@ open class FindMirukenHandlersTask : DefaultTask() {
                     project.logger.lifecycle("    Wrote ${classes.size} handler classes to")
                     project.logger.lifecycle("        $scanResult")
                     project.logger.lifecycle("    Refer to resource as ")
-                    project.logger.lifecycle("        $resourceName")
+                    project.logger.lifecycle("        ${resourceName.get()}")
                 }
     }
 

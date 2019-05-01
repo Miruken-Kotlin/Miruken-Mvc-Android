@@ -11,7 +11,8 @@ import com.miruken.mvc.view.Viewing
 import com.miruken.mvc.view.ViewingRegion
 
 class FragmentViewAdapter(
-        private val fragment: Fragment
+        private val fragment: Fragment,
+        private val stateless: Boolean = false
 ) : Viewing, ViewProvider {
     override var viewModel: Any? = null
 
@@ -29,14 +30,24 @@ class FragmentViewAdapter(
         }
         activity.supportFragmentManager
                 .beginTransaction()
-                .replace(container.id, fragment)
-                .commit()
-        navigation?.context?.also {
-            it.contextEnded += {
+                .replace(container.id, fragment).let {
+                    if (stateless) {
+                        it.commitAllowingStateLoss()
+                    } else {
+                        it.commit()
+                    }
+                }
+        navigation?.context?.also { ctx ->
+            ctx.contextEnded += {
                 activity.supportFragmentManager
                         .beginTransaction()
-                        .remove(fragment)
-                        .commit()
+                        .remove(fragment).let {
+                            if (stateless) {
+                                it.commitAllowingStateLoss()
+                            } else {
+                                it.commit()
+                            }
+                        }
             }
         }
         return container

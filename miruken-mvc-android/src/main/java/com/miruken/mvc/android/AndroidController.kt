@@ -90,18 +90,25 @@ open class AndroidController : Controller(),
             init:      ((B) -> Unit)? = null
     ) = show(handler, ViewBindingLayout(layoutId, viewModelId, viewModel, init))
 
-    protected fun showFragment(fragment: Fragment) =
-            show(FragmentViewAdapter(fragment))
+    protected fun showFragment(
+            fragment:  Fragment,
+            stateless: Boolean = false
+    ) = show(FragmentViewAdapter(fragment, stateless))
 
-    protected fun showFragment(handler: Handling, fragment: Fragment) =
-            show(handler, FragmentViewAdapter(fragment))
+    protected fun showFragment(
+            handler:   Handling,
+            fragment:  Fragment,
+            stateless: Boolean = false
+    ) = show(handler, FragmentViewAdapter(fragment, stateless))
 
-    protected inline fun <reified F: Fragment> showFragment() =
-            showFragment<F>(io)
+    protected inline fun <reified F: Fragment> showFragment(stateless: Boolean = false) =
+            showFragment<F>(io, stateless)
 
-    protected inline fun <reified F: Fragment> showFragment(handler: Handling) =
-            show(handler, FragmentViewAdapter(io.resolve<F>() ?:
-                error("Unable to resolve Fragment ${F::class}")))
+    protected inline fun <reified F: Fragment> showFragment(
+            handler:   Handling,
+            stateless: Boolean = false
+    ) = show(handler, FragmentViewAdapter(io.resolve<F>() ?:
+        error("Unable to resolve Fragment ${F::class}"), stateless))
 
     protected fun shake(view: View, duration: Long, offset: Int, repeat: Int): View {
         val anim = TranslateAnimation((-offset).toFloat(), offset.toFloat(), 0f, 0f)

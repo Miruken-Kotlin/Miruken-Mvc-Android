@@ -17,6 +17,10 @@ val Project.android: BaseExtension
         return this.extensions.getByName(android) as BaseExtension
     }
 
+val Project.isApplication: Boolean
+    get() = this.android is AppExtension
+
+
 val Project.variants: DomainObjectCollection<out BaseVariant>
     get() {
         val android = this.android

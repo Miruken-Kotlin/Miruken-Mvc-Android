@@ -27,6 +27,7 @@ def artifactName = 'miruken-gradle-android'
 
 publishing {
     repositories {
+        //Only for local testing
         /*
         maven {
             name="test"

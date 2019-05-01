@@ -6,7 +6,6 @@ import io.github.classgraph.ClassGraph
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.gradle.api.provider.Property
 
 open class FindMirukenHandlersTask : DefaultTask() {
 
@@ -18,10 +17,11 @@ open class FindMirukenHandlersTask : DefaultTask() {
     private var targetVariant = "Debug"
     private var studioBuild   = true
 
-    val resourceName:Property<String> = project.objects.property(String::class.java)
+    private val fileName
+        get() = "handlers.txt"
 
     private val scanResult
-        get() = "$rawDir${resourceName.get()}.txt"
+        get() = "$rawDir$fileName"
 
     private val compileTask : KotlinCompile
         get() = try {
@@ -49,9 +49,28 @@ open class FindMirukenHandlersTask : DefaultTask() {
                     studioBuild   = false
                 }
                 else -> {
-                    variant.registerGeneratedResFolders(project
-                            .files(listOf(resDir))
-                            .builtBy(this))
+                    variant.mergeAssetsProvider.get().also{ p ->
+                        val output = "${p.outputDir}/com/miruken/"
+                        p.dependsOn(this)
+                        p.doLast {
+                            val dir = "$output${project.name}/"
+                            File(scanResult).copyTo(File("$dir/$fileName"), true)
+                        }
+                        if (project.isApplication) {
+                            p.doLast {
+                                var handlers = File("$output$fileName")
+                                if (handlers.exists()) {
+                                    handlers.delete()
+                                    handlers.createNewFile()
+                                }
+                                File(output).walkTopDown().forEach { f ->
+                                    if (f.name == fileName){
+                                        handlers.appendBytes(f.readBytes())
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -65,6 +84,7 @@ open class FindMirukenHandlersTask : DefaultTask() {
 
     @TaskAction
     fun runClassGraph() {
+
         project.logger.debug("**** studioBuild: $studioBuild targetVariant: $targetVariant")
         project.variants.forEach {
             project.logger.debug("**** available variant: ${it.name}")
@@ -109,8 +129,6 @@ open class FindMirukenHandlersTask : DefaultTask() {
                     }
                     project.logger.lifecycle("    Wrote ${classes.size} handler classes to")
                     project.logger.lifecycle("        $scanResult")
-                    project.logger.lifecycle("    Refer to resource as ")
-                    project.logger.lifecycle("        ${resourceName.get()}")
                 }
     }
 

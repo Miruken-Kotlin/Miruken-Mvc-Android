@@ -13,6 +13,7 @@ import com.miruken.runtime.isInstanceCallable
 import kotlinx.coroutines.*
 import timber.log.Timber
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
@@ -114,42 +115,31 @@ class FixedHandlerDescriptorFactory(
 
     companion object {
         fun registerHandlers(
-                activity:     AppCompatActivity,
-                resourceName: String,
-                visitor:      HandlerDescriptorVisitor? = null,
-                done:         suspend CoroutineScope.() -> Unit
-        ) {
-            registerHandlers(activity, listOf(resourceName), visitor, done)
-        }
-
-        fun registerHandlers(
                 activity:      AppCompatActivity,
-                resourceNames: Collection<String>,
                 visitor:       HandlerDescriptorVisitor? = null,
                 done:          suspend CoroutineScope.() -> Unit
         ) = GlobalScope.launch {
-            val resources = activity.resources
+            val assets = activity.resources.assets
             val handlers  = ConcurrentHashMap.newKeySet<String>()
             val begin     = System.currentTimeMillis()
 
-            resourceNames.flatMap { resourceName ->
-                val id = resources.getIdentifier(resourceName, "raw", activity.packageName)
-                BufferedReader(InputStreamReader(resources.openRawResource(id)))
-                    .use { it.readLines() }.map { line -> async {
-                            val start           = System.currentTimeMillis()
-                            val members         = line.split(";").filter { it.isNotBlank() }
-                            val handler         = members[0]
-                            if (!handlers.add(handler)) return@async null
-                            val methods         = members.drop(1)
-                            val hasMethods      = methods.any { !it.startsWith("<init>") }
-                            val hasConstructors = methods.any { it.startsWith("<init>") }
-                            val handlerClass    = Class.forName(handler).kotlin
-                            createDescriptor(handlerClass, hasMethods, hasConstructors, visitor).also {
-                                val time = System.currentTimeMillis() - start
-                                Timber.d("Register handler '$handlerClass' took ($time ms) ${Thread.currentThread().name}")
-                            }
+            val sep = File.pathSeparator
+            BufferedReader(InputStreamReader(assets.open("com${sep}miruken${sep}handlers.txt")))
+                .use { it.readLines() }.map { line -> async {
+                        val start           = System.currentTimeMillis()
+                        val members         = line.split(";").filter { it.isNotBlank() }
+                        val handler         = members[0]
+                        if (!handlers.add(handler)) return@async null
+                        val methods         = members.drop(1)
+                        val hasMethods      = methods.any { !it.startsWith("<init>") }
+                        val hasConstructors = methods.any { it.startsWith("<init>") }
+                        val handlerClass    = Class.forName(handler).kotlin
+                        createDescriptor(handlerClass, hasMethods, hasConstructors, visitor).also {
+                            val time = System.currentTimeMillis() - start
+                            Timber.d("Register handler '$handlerClass' took ($time ms) ${Thread.currentThread().name}")
                         }
-                    }.mapNotNull { it.await() }
+                    }
+                }.mapNotNull { it.await()
             }.also {
                 HandlerDescriptorFactory.useFactory(FixedHandlerDescriptorFactory(it))
             }.also {

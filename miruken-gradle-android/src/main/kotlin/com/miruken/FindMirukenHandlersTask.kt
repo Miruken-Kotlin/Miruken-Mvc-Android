@@ -9,19 +9,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 open class FindMirukenHandlersTask : DefaultTask() {
 
-    private val sep           = java.io.File.separator
-    private val mirukenDir    = "${project.buildDir}${sep}generated${sep}source${sep}miruken$sep"
-    private val resDir        = "${mirukenDir}res$sep"
-    private val rawDir        = "${resDir}raw$sep"
-
     private var targetVariant = "Debug"
     private var studioBuild   = true
 
-    private val fileName
-        get() = "handlers.txt"
-
-    private val scanResult
-        get() = "$rawDir$fileName"
+    private val sep           = java.io.File.separator
+    private val mirukenDir    = "${project.buildDir}${sep}generated${sep}source${sep}miruken$sep"
+    private val fileName      = "handlers.txt"
+    private val scanResult    = "$mirukenDir$fileName"
 
     private val compileTask : KotlinCompile
         get() = try {
@@ -93,7 +87,7 @@ open class FindMirukenHandlersTask : DefaultTask() {
         }
 
         //create output directories
-        File(rawDir).mkdirs()
+        File(mirukenDir).mkdirs()
 
         val usePolicy = "com.miruken.callback.policy.UsePolicy"
 

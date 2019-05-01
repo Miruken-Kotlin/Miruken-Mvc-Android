@@ -49,7 +49,9 @@ open class FindMirukenHandlersTask : DefaultTask() {
                     studioBuild   = false
                 }
                 else -> {
-                    variant.mergeAssetsProvider.get().also{ p ->
+                    //Can't get rid of this deprecated call until we can go to gradle 4.10
+                    //digital.wup:android-maven-publish:3.4.0 has us stuck on 4.6
+                    variant.mergeAssets.also{ p ->
                         val output = "${p.outputDir}/com/miruken/"
                         p.dependsOn(this)
                         p.doLast {
@@ -58,7 +60,7 @@ open class FindMirukenHandlersTask : DefaultTask() {
                         }
                         if (project.isApplication) {
                             p.doLast {
-                                var handlers = File("$output$fileName")
+                                val handlers = File("$output$fileName")
                                 if (handlers.exists()) {
                                     handlers.delete()
                                     handlers.createNewFile()

@@ -123,7 +123,7 @@ class FixedHandlerDescriptorFactory(
             val handlers  = ConcurrentHashMap.newKeySet<String>()
             val begin     = System.currentTimeMillis()
 
-            val sep = File.pathSeparator
+            val sep = File.separator
             BufferedReader(InputStreamReader(assets.open("com${sep}miruken${sep}handlers.txt")))
                 .use { it.readLines() }.map { line -> async {
                         val start           = System.currentTimeMillis()

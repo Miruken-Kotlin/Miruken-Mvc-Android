@@ -6,14 +6,17 @@ import android.view.animation.TranslateAnimation
 import androidx.annotation.CallSuper
 import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
+import androidx.databinding.Observable
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import com.miruken.callback.Handling
 import com.miruken.callback.resolve
+import com.miruken.context.dispose
 import com.miruken.context.requireContext
 import com.miruken.mvc.Controller
 import com.miruken.mvc.android.databinding.NotifiableObservable
+import com.miruken.mvc.android.databinding.addOnPropertyChanged
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -134,5 +137,20 @@ open class AndroidController : Controller(),
     @CallSuper
     override fun cleanUp() {
         coroutineContext.cancelChildren()
+    }
+
+    // Observe
+
+    fun <T: Observable> T.observe(
+            @IdRes vararg propertyIds: Int,
+            callback:(T, Int) -> Unit
+    ): () -> Unit {
+        val unsubscribe = addOnPropertyChanged { _, propertyId ->
+            if (propertyIds.contains(propertyId)) {
+                callback(this, propertyId)
+            }
+        }
+        context?.dispose(AutoCloseable(unsubscribe))
+        return unsubscribe
     }
 }

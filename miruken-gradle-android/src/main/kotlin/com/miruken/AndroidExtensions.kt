@@ -23,8 +23,7 @@ val Project.isApplication: Boolean
 
 val Project.variants: DomainObjectCollection<out BaseVariant>
     get() {
-        val android = this.android
-        return when (android) {
+        return when (val android = this.android) {
             is AppExtension ->
                 android.applicationVariants
             is LibraryExtension ->

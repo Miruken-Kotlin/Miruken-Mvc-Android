@@ -5,6 +5,7 @@ import android.content.Context
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.IdRes
+import androidx.fragment.app.FragmentActivity
 
 // Binding
 
@@ -39,3 +40,24 @@ fun View.hideKeyboard() {
     focused?.clearFocus()
 }
 
+// Fragment
+
+fun FragmentActivity.clearFragmentStack() {
+    val fragmentManager = supportFragmentManager
+    val backStackEntry = fragmentManager.backStackEntryCount
+    if (backStackEntry > 0) {
+        for (i in 0 until backStackEntry) {
+            fragmentManager.popBackStackImmediate()
+        }
+    }
+
+    val fragments = fragmentManager.fragments
+    if (fragments.size > 0) {
+        for (i in 0 until fragments.size) {
+            val fragment = fragments[i]
+            if (fragment != null) {
+                fragmentManager.beginTransaction().remove(fragment).commit()
+            }
+        }
+    }
+}

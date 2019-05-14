@@ -9,6 +9,8 @@ import com.miruken.typeOf
 interface Intents {
     fun fulfillIntentWithResult(intent: Intent): Promise<Intent?>
 
+    fun fulfillIntent(intent: Intent, title: String?)
+
     companion object {
         val PROTOCOL = typeOf<Intents>()
         operator fun invoke(adapter: ProtocolAdapter) =

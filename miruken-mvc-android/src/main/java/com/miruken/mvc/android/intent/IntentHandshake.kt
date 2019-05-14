@@ -2,6 +2,8 @@ package com.miruken.mvc.android.intent
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import com.miruken.concurrent.Promise
 import java.lang.IllegalStateException
 import java.util.concurrent.ConcurrentHashMap
@@ -28,6 +30,23 @@ object IntentHandshake {
             } else {
                 it.reject(IntentException(resultCode,
                         "Intent failed with result code: $resultCode"))
+            }
+        }
+    }
+
+    fun fulfillIntent(intent: Intent, title: String?, activity: Activity) {
+        val activities = activity.packageManager.queryIntentActivities(
+                intent,
+                PackageManager.MATCH_DEFAULT_ONLY
+        )
+        if (activities.isNotEmpty()) {
+            if (activities.count() > 1) {
+                val chosen = Intent.createChooser(intent, title ?: "Open with")
+                if (chosen != null){
+                    activity.startActivity(chosen)
+                }
+            } else {
+                activity.startActivity(intent)
             }
         }
     }

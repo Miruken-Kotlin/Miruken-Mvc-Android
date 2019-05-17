@@ -34,20 +34,13 @@ object IntentHandshake {
         }
     }
 
-    fun fulfillIntent(intent: Intent, title: String?, activity: Activity) {
+    fun fulfillIntent(intent: Intent, activity: Activity) {
         val activities = activity.packageManager.queryIntentActivities(
                 intent,
                 PackageManager.MATCH_DEFAULT_ONLY
         )
         if (activities.isNotEmpty()) {
-            if (activities.count() > 1) {
-                val chosen = Intent.createChooser(intent, title ?: "Open with")
-                if (chosen != null){
-                    activity.startActivity(chosen)
-                }
-            } else {
-                activity.startActivity(intent)
-            }
+            activity.startActivity(intent)
         }
     }
 

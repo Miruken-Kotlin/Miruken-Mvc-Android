@@ -9,7 +9,7 @@ import com.miruken.typeOf
 interface Intents {
     fun fulfillIntentWithResult(intent: Intent): Promise<Intent?>
 
-    fun fulfillIntent(intent: Intent, title: String?)
+    fun fulfillIntent(intent: Intent)
 
     companion object {
         val PROTOCOL = typeOf<Intents>()

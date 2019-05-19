@@ -32,6 +32,7 @@ android {
     lintOptions {
         abortOnError false
     }
+
 }
 
 dependencies {
@@ -49,10 +50,16 @@ dependencies {
 
 def artifactName = 'miruken-mvc-android'
 
+task sourceJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier "sources"
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
             from components.android
+            artifact   sourceJar
             groupId    mirukenGroupId
             artifactId artifactName
             pom.withXml {

@@ -19,35 +19,44 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty
-import kotlin.reflect.KType
 import kotlin.reflect.full.isSubclassOf
 
-class FixedHandlerDescriptorFactory(
+class ImmutableHandlerDescriptorFactory(
         descriptors: Collection<HandlerDescriptor>
 ) : HandlerDescriptorFactory {
 
     private val _descriptors  = descriptors.associateBy { it.handlerClass }
-    private val _handlerCache = ConcurrentHashMap<HandlerCacheKey, List<KType>>()
+    private val _handlerCache = ConcurrentHashMap<HandlerCacheKey, List<HandlerDescriptor>>()
 
-    override fun getDescriptor(handlerClass: KClass<*>) = _descriptors[handlerClass]
+    override fun getDescriptor(handlerClass: KClass<*>) =
+            _descriptors[handlerClass]
+
+    override fun registerDescriptor(
+            handlerClass:  KClass<*>,
+            customVisitor: HandlerDescriptorVisitor?
+    ): HandlerDescriptor {
+        throw UnsupportedOperationException(
+                "This factory is immutable and does not support ad-hoc registrations"
+        )
+    }
 
     override fun getInstanceHandlers(
             policy:       CallbackPolicy,
             callback:     Any,
             callbackType: TypeReference?
-    ) = getCachedHandlerTypes(policy, callback, callbackType, true, false)
+    ) = getCachedHandlerTypes(policy, callback, callbackType, instances = true, types = false)
 
     override fun getTypeHandlers(
             policy:       CallbackPolicy,
             callback:     Any,
             callbackType: TypeReference?
-    ) = getCachedHandlerTypes(policy, callback, callbackType, false, true)
+    ) = getCachedHandlerTypes(policy, callback, callbackType, instances = false, types = true)
 
     override fun getCallbackHandlers(
             policy:       CallbackPolicy,
             callback:     Any,
             callbackType: TypeReference?
-    ) = getCachedHandlerTypes(policy, callback, callbackType, true, true)
+    ) = getCachedHandlerTypes(policy, callback, callbackType, instances = true, types = true)
 
     private fun getCachedHandlerTypes(
             policy:       CallbackPolicy,
@@ -55,7 +64,7 @@ class FixedHandlerDescriptorFactory(
             callbackType: TypeReference? = null,
             instances:    Boolean        = false,
             types:        Boolean        = false
-    ): List<KType> = _handlerCache.getOrPut(HandlerCacheKey(
+    ): List<HandlerDescriptor> = _handlerCache.getOrPut(HandlerCacheKey(
             callback, callbackType, policy, instances, types)) {
         getHandlerTypes(policy, callback, callbackType, instances, types)
     }
@@ -66,7 +75,7 @@ class FixedHandlerDescriptorFactory(
             callbackType: TypeReference? = null,
             instances:    Boolean        = false,
             types:        Boolean        = false
-    ): List<KType> {
+    ): List<HandlerDescriptor> {
         if (_descriptors.isEmpty()) return emptyList()
         val invariants   = mutableListOf<PolicyMemberBinding>()
         val compatible   = mutableListOf<PolicyMemberBinding>()
@@ -90,7 +99,9 @@ class FixedHandlerDescriptorFactory(
                     ?.firstOrNull())?.also { compatible.addSorted(it, orderMembers) }
         }
 
-        return (invariants + compatible).map { it.dispatcher.owningType }
+        return (invariants + compatible).mapNotNull {
+            getDescriptor(it.dispatcher.owningClass)
+        }
     }
 
     override fun getPolicyMembers(policy: CallbackPolicy, key: Any) =
@@ -141,7 +152,7 @@ class FixedHandlerDescriptorFactory(
                     }
                 }.mapNotNull { it.await()
             }.also {
-                HandlerDescriptorFactory.useFactory(FixedHandlerDescriptorFactory(it))
+                HandlerDescriptorFactory.useFactory(ImmutableHandlerDescriptorFactory(it))
             }.also {
                 val total = System.currentTimeMillis() - begin
                 Timber.d("Registered ${it.size} handlers in ($total ms) ${Thread.currentThread().name}")

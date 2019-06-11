@@ -33,7 +33,7 @@ class LifecycleProvider(val lifecycle: Lifecycle) : FilteringProvider {
     }
 
     private object LifecycleAwareFilter : Filtering<Inquiry, LifecycleAware> {
-        override var order: Int? = null
+        override var order: Int? = Int.MAX_VALUE - 1000
 
         override fun next(
                 callback:    Inquiry,
@@ -51,7 +51,7 @@ class LifecycleProvider(val lifecycle: Lifecycle) : FilteringProvider {
     }
 
     private object LifecycleObserverFilter : Filtering<Inquiry, LifecycleObserver> {
-        override var order: Int? = null
+        override var order: Int? = Int.MAX_VALUE - 1000
 
         override fun next(
                 callback:    Inquiry,

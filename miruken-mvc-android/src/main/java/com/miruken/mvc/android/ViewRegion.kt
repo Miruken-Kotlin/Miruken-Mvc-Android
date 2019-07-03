@@ -16,39 +16,60 @@ import com.miruken.mvc.view.ViewingStackView
 import java.util.concurrent.atomic.AtomicBoolean
 
 class ViewRegion : ViewContainer, ViewingStackView {
-    private val _layers    = mutableListOf<ViewLayer>()
-    private var _unwinding = false
-    private var _isChild   = false
+    private val _layers       = mutableListOf<ViewLayer>()
+    private var _unwinding    = false
+    private var _isChild      = false
 
     constructor(
-            context: Context?
+            context: Context
     ) : super(context)
 
     constructor(
-            context: Context?,
-            attrs:   AttributeSet?
-    ) : super(context, attrs)
+            context: Context,
+            attrs:   AttributeSet
+    ) : super(context, attrs) {
+        init(context, attrs, 0)
+    }
 
     constructor(
-            context:      Context?,
-            attrs:        AttributeSet?,
+            context:      Context,
+            attrs:        AttributeSet,
             defStyleAttr: Int
-    ) : super(context, attrs, defStyleAttr)
+    ) : super(context, attrs, defStyleAttr) {
+        init(context, attrs, defStyleAttr)
+    }
 
     val activeView get() = activeLayer?.view
 
     @Provides
     fun provideContext(): Context = context
 
+    private fun init(
+            context:      Context,
+            attrs:        AttributeSet,
+            defStyleAttr: Int
+    ) {
+        context.theme.obtainStyledAttributes(
+                attrs, R.styleable.ViewRegion, defStyleAttr, 0).apply {
+            tag = getString(R.styleable.ViewRegion_tag)
+            recycle()
+        }
+    }
+
     override fun createViewStack() =
             ViewRegion(context).apply { _isChild = true }
 
     override fun show(view: Viewing, composer: Handling): ViewingLayer {
-        var push          = false
-        var overlay       = false
-        val navigation    = composer.resolve<Navigation<*>>()
         val options       = composer.getOptions(NavigationOptions())
         val regionOptions = options?.region
+        val region        = regionOptions?.region
+        if (region != null && region != tag) {
+            notHandled()
+        }
+
+        var push       = false
+        var overlay    = false
+        val navigation = composer.resolve<Navigation<*>>()
 
         var layer: ViewLayer? = null
 

@@ -1,7 +1,10 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package com.miruken.mvc.android
 
 import android.os.Handler
 import android.os.Looper
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.FutureTask
 
 object AndroidThreading {
@@ -11,7 +14,13 @@ object AndroidThreading {
 
     fun postOnMainThread(block: () -> Unit) {
         if (Thread.currentThread() != mainThread) {
-            mainHandler.post(block)
+            val task = FutureTask(block)
+            mainHandler.post(task)
+            try {
+                task.get()
+            } catch (t: ExecutionException) {
+                throw t.cause ?: t
+            }
         } else {
             block()
         }
@@ -19,9 +28,13 @@ object AndroidThreading {
 
     fun <T: Any?> runOnMainThread(block: () -> T): T =
             if (Thread.currentThread() != mainThread) {
-                val task = FutureTask<T>(block)
+                val task = FutureTask(block)
                 mainHandler.post(task)
-                task.get()
+                try {
+                    task.get()
+                } catch (t: ExecutionException) {
+                    throw t.cause ?: t
+                }
             } else {
                 block()
             }

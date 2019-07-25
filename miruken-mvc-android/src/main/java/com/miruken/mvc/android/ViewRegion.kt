@@ -71,6 +71,15 @@ class ViewRegion : ViewContainer, ViewingStackView {
         var overlay    = false
         val navigation = composer.resolve<Navigation<*>>()
 
+        if (region == null) {
+            val impliedRegion = navigation?.viewRegion
+            if (impliedRegion != null && impliedRegion != tag) {
+                notHandled()
+            }
+        } else {
+            navigation?.viewRegion = region
+        }
+
         var layer: ViewLayer? = null
 
         if (_layers.isEmpty()) {

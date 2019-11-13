@@ -99,8 +99,7 @@ class ViewRegion : ViewContainer, ViewingStackView {
 
         if (push) {
             layer = if (overlay) {
-                ViewLayer(push = true, overlay = true)
-                        .apply { _layers.add(this) }
+                createLayer(push = true, overlay = true)
             } else {
                 pushLayer()
             }
@@ -108,8 +107,7 @@ class ViewRegion : ViewContainer, ViewingStackView {
             layer = (navigation?.viewLayer as? ViewLayer)?.takeIf {
                 _layers.contains(it)
             } ?: _layers.firstOrNull { !it.push }
-              ?: ViewLayer(bottom = true)
-                    .apply { _layers.add(0, this) }
+              ?: createLayer(bottom = _layers.isNotEmpty())
         }
 
         return (layer ?: activeLayer)?.apply {
@@ -135,6 +133,18 @@ class ViewRegion : ViewContainer, ViewingStackView {
             _layers.last().close()
         }
         _unwinding = false
+    }
+
+    private fun createLayer(
+            push:    Boolean = false,
+            overlay: Boolean = false,
+            bottom:  Boolean = false
+    ) = ViewLayer(push, overlay, bottom).apply {
+        if (bottom) {
+            _layers.add(0, this)
+        } else {
+            _layers.add(this)
+        }
     }
 
     private fun removeLayer(layer: ViewLayer) =

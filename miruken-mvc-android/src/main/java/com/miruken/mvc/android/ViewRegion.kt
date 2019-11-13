@@ -82,13 +82,11 @@ class ViewRegion : ViewContainer, ViewingStackView {
 
         var layer: ViewLayer? = null
 
-        if (_layers.isEmpty()) {
-            push = true
-        } else regionOptions?.also {
+        regionOptions?.also {
             when {
                 it.push == true -> push = true
                 it.overlay == true -> {
-                    push    = true
+                    push = true
                     overlay = true
                 }
                 it.unload == true -> {
@@ -101,14 +99,17 @@ class ViewRegion : ViewContainer, ViewingStackView {
 
         if (push) {
             layer = if (overlay) {
-                pushOverlay()
+                ViewLayer(push = true, overlay = true)
+                        .apply { _layers.add(this) }
             } else {
                 pushLayer()
             }
         } else if (layer == null) {
             layer = (navigation?.viewLayer as? ViewLayer)?.takeIf {
                 _layers.contains(it)
-            }
+            } ?: _layers.firstOrNull { !it.push }
+              ?: ViewLayer(bottom = true)
+                    .apply { _layers.add(0, this) }
         }
 
         return (layer ?: activeLayer)?.apply {
@@ -125,9 +126,8 @@ class ViewRegion : ViewContainer, ViewingStackView {
     private val activeLayer get() =
         if (_layers.isNotEmpty()) _layers.last() else null
 
-    override fun pushLayer() = createLayer(false)
-
-    private fun pushOverlay() = createLayer(true)
+    override fun pushLayer() =
+            ViewLayer(push = true).apply { _layers.add(this) }
 
     override fun unwindLayers() {
         _unwinding = true
@@ -136,9 +136,6 @@ class ViewRegion : ViewContainer, ViewingStackView {
         }
         _unwinding = false
     }
-
-    private fun createLayer(overlay: Boolean) =
-            ViewLayer(overlay).apply { _layers.add(this) }
 
     private fun removeLayer(layer: ViewLayer) =
             layer.takeIf { _layers.remove(it) }
@@ -162,6 +159,7 @@ class ViewRegion : ViewContainer, ViewingStackView {
     private fun addView(
             fromView:       View?,
             view:           View,
+            viewIndex:      Int?,
             options:        NavigationOptions?,
             removeFromView: Boolean,
             composer:       Handling
@@ -231,7 +229,9 @@ class ViewRegion : ViewContainer, ViewingStackView {
     }
 
     inner class ViewLayer(
-            private val overlay: Boolean
+            val push:    Boolean = false,
+            val overlay: Boolean = false,
+            val bottom:  Boolean = false
     ) : ViewingLayer {
         private var _composer: Handling? = null
         private var _disposed = false
@@ -273,9 +273,11 @@ class ViewRegion : ViewContainer, ViewingStackView {
                 }
             }
 
+            val index = if (bottom && oldView == null) 0 else null
+
             view = newView
-            addView(oldView?.second, newView.second, options,
-                    removeFromView, composer)
+            addView(oldView?.second, newView.second, index,
+                    options, removeFromView, composer)
 
             transitioned(this)
             return this

@@ -170,11 +170,15 @@ class ViewRegion : ViewContainer, ViewingStackView {
 
         applyConstraints(view)
 
-        val fromIndex = fromView?.let { indexOfChild(it) } ?: -1
-        if (fromIndex >= 0) {
-            addView(view, fromIndex + 1)
+        if (viewIndex != null) {
+            addView(view, viewIndex)
         } else {
-            addView(view)
+            val fromIndex = fromView?.let { indexOfChild(it) } ?: -1
+            if (fromIndex >= 0) {
+                addView(view, fromIndex + 1)
+            } else {
+                addView(view)
+            }
         }
 
         fromView?.takeIf { removeFromView }?.apply {

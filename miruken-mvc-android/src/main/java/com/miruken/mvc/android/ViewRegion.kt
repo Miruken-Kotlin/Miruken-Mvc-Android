@@ -169,7 +169,7 @@ class ViewRegion : ViewContainer, ViewingStackView {
     private fun addView(
             fromView:       View?,
             view:           View,
-            viewIndex:      Int?,
+            bottom:         Boolean,
             options:        NavigationOptions?,
             removeFromView: Boolean,
             composer:       Handling
@@ -180,15 +180,20 @@ class ViewRegion : ViewContainer, ViewingStackView {
 
         applyConstraints(view)
 
-        if (viewIndex != null) {
-            addView(view, viewIndex)
-        } else {
-            val fromIndex = fromView?.let { indexOfChild(it) } ?: -1
-            if (fromIndex >= 0) {
-                addView(view, fromIndex + 1)
-            } else {
-                addView(view)
+        val fromIndex = if (bottom) {
+            _layers.firstOrNull { it.view != null }?.let {
+                indexOfChild(it.view?.second)
             }
+        } else {
+            fromView?.let { indexOfChild(it) }?.let {
+                if (it >= 0) it + 1 else -1
+            } ?: -1
+        }
+
+        if (fromIndex ?: -1 >= 0) {
+            addView(view, fromIndex!!)
+        } else {
+            addView(view)
         }
 
         fromView?.takeIf { removeFromView }?.apply {
@@ -287,10 +292,9 @@ class ViewRegion : ViewContainer, ViewingStackView {
                 }
             }
 
-            val index = if (bottom && oldView == null) 0 else null
-
             view = newView
-            addView(oldView?.second, newView.second, index,
+            addView(oldView?.second, newView.second,
+                    bottom && oldView == null,
                     options, removeFromView, composer)
 
             transitioned(this)

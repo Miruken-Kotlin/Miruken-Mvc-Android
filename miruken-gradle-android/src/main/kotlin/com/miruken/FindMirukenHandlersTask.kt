@@ -1,5 +1,6 @@
 package com.miruken
 
+import com.android.build.gradle.internal.tasks.factory.dependsOn
 import org.gradle.api.DefaultTask
 import java.io.File
 import io.github.classgraph.ClassGraph
@@ -43,17 +44,17 @@ open class FindMirukenHandlersTask : DefaultTask() {
                     studioBuild   = false
                 }
                 else -> {
-                    //Can't get rid of this deprecated call until we can go to gradle 4.10
-                    //digital.wup:android-maven-publish:3.4.0 has us stuck on 4.6
-                    variant.mergeAssets.also{ p ->
-                        val output = "${p.outputDir}/com/miruken/"
+                    variant.mergeAssetsProvider.also{ p ->
+                        val mergeSourceSetFolders = p.get()
+
+                        val output = "${mergeSourceSetFolders.outputDir.get()}/com/miruken/"
                         p.dependsOn(this)
-                        p.doLast {
+                        mergeSourceSetFolders.doLast {
                             val dir = "$output${project.name}/"
                             File(scanResult).copyTo(File("$dir/$fileName"), true)
                         }
                         if (project.isApplication) {
-                            p.doLast {
+                            mergeSourceSetFolders.doLast {
                                 val handlers = File("$output$fileName")
                                 if (handlers.exists()) {
                                     handlers.delete()

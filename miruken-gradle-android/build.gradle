@@ -27,7 +27,7 @@ def artifactName = 'miruken-gradle-android'
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
-    classifier = 'sources'
+    archiveClassifier.set("sources")
 }
 
 publishing {

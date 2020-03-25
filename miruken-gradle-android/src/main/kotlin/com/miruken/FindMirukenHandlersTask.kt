@@ -7,13 +7,14 @@ import io.github.classgraph.ClassGraph
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.*
 
 open class FindMirukenHandlersTask : DefaultTask() {
 
     private var targetVariant = "Debug"
     private var studioBuild   = true
 
-    private val sep           = java.io.File.separator
+    private val sep           = File.separator
     private val mirukenDir    = "${project.buildDir}${sep}generated${sep}source${sep}miruken$sep"
     private val fileName      = "handlers.txt"
     private val scanResult    = "$mirukenDir$fileName"
@@ -32,7 +33,7 @@ open class FindMirukenHandlersTask : DefaultTask() {
                 .create(CLASS_GRAPH_VARIANT)
 
         android.buildTypes.all { b ->
-            if (b.name.toLowerCase() == "debug"){
+            if (b.name.toLowerCase(Locale.getDefault()) == "debug"){
                 buildType.initWith(b)
             }
         }

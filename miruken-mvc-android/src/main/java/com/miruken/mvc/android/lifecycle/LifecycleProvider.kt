@@ -3,6 +3,7 @@ package com.miruken.mvc.android.lifecycle
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.miruken.TypeReference
 import com.miruken.callback.*
 import com.miruken.callback.policy.bindings.MemberBinding
 import com.miruken.context.Contextual
@@ -15,11 +16,18 @@ class LifecycleProvider(val lifecycle: Lifecycle) : FilteringProvider {
 
     override val required = true
 
+    override fun appliesTo(
+            callback: Any,
+            callbackType: TypeReference?
+    ) = callback is Inquiry
+
     override fun getFilters(
-            binding:    MemberBinding,
-            filterType: KType,
-            composer:   Handling
-    ): List<Filtering<*,*>> {
+            binding:      MemberBinding,
+            filterType:   KType,
+            callback:     Any,
+            callbackType: TypeReference?,
+            composer:     Handling
+    ): List<Filtering<*, *>>? {
         return binding.returnType.jvmErasure.let {
             if (it.isSubclassOf(LifecycleAware::class)) {
                 listOf(LifecycleAwareFilter)
